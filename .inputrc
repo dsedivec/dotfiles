@@ -1,0 +1,15 @@
+$include /etc/inputrc
+
+$if psql-nocomplete
+set disable-completion on
+$endif
+
+$if Bash
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+"\M-s": menu-complete
+Space: magic-space
+set visible-stats on
+set match-hidden-files off
+set completion-ignore-case on
+$endif

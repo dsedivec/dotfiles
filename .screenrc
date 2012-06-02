@@ -1,0 +1,5 @@
+escape ^Wa
+startup_message off
+autodetach on
+defscrollback 50000
+termcapinfo xterm ti@:te@
