@@ -1,0 +1,3 @@
+--pager=less
+--type-set=coffee=.coffee
+--smart-case

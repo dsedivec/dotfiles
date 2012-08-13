@@ -1,0 +1,44 @@
+[include]
+	path = ~/.gitconfig.private
+[rerere]
+	enabled = 1
+[color]
+	ui = auto
+[merge]
+	tool = emerge
+[instaweb]
+	port = 4321
+	#httpd = /opt/local/apache2/bin/httpd
+	#modulepath = /opt/local/apache2/modules
+	local = true
+[push]
+	default = tracking
+[diff]
+	tool = opendiff
+	guitool = opendiff
+	renames = copies
+[apply]
+	whitespace = error
+[alias]
+	pff = pull --ff-only
+	mff = merge --ff-only
+	mc = merge --no-ff
+	mom = merge origin/master
+	pom = pull origin master
+	mm = merge master
+	dom = diff origin/master
+	dm = diff master
+	ds = diff --stat
+	dsom = !git ds origin/master
+	dsm = !git ds master
+	lom = log ^origin/master HEAD
+	lm = log ^master HEAD
+	lsom = log --stat ^origin/master HEAD
+	lsm = log --stat ^master HEAD
+	ssb = status -sb
+	co = checkout
+	dt = difftool
+	dtom = difftool origin/master
+	spush = !git-spush
+[rebase]
+	autosquash = 1

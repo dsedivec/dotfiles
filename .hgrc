@@ -1,0 +1,6 @@
+%include ~/.hgrc.private
+
+[extensions]
+color =
+pager =
+rebase =
