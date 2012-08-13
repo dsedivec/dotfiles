@@ -246,7 +246,7 @@ emacs_app=$HOME/Applications/Emacs.app/Contents/MacOS/Emacs
 if [ -x "$emacs_app" ]; then
 	export EMACS=$emacs_app
 
-	emacsclient=$HOME/Library/Emacs/bin/emacsclient
+	emacsclient=$HOME/bin/emacsclient
 	if [ -x "$emacsclient" ]; then
 		export EMACSCLIENT=$emacsclient
 	fi
