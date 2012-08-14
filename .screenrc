@@ -1,4 +1,4 @@
-escape ^Wa
+escape ^Ff
 startup_message off
 autodetach on
 defscrollback 50000
