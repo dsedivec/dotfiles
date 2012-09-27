@@ -1,3 +1,6 @@
+" Notes:
+" Leader is \
+
 " Must turn off filetype before loading Vundle, apparently.
 filetype off
 set runtimepath+=~/.vim/bundle/vundle/
@@ -6,6 +9,31 @@ call vundle#rc()
 " Bundles to install, Vundle must be listed here.
 Bundle 'gmarik/vundle'
 Bundle 'scrooloose/nerdcommenter'
+
+" Recommended by
+" http://www.vimninjas.com/2012/09/03/5-plugins-you-should-put-in-your-vimrc/
+
+" Surround things with matched pairs
+" https://github.com/tpope/vim-surround/
+Bundle 'tpope/vim-surround'
+" Find files.  Pure Vim alternative to Command-T, but try Command-T if this is
+" too slow, perhaps.
+" https://github.com/kien/ctrlp.vim
+Bundle 'kien/ctrlp.vim'
+" Syntax checking for lots of languages.
+" https://github.com/scrooloose/syntastic
+Bundle 'scrooloose/syntastic'
+
+" Recommended by https://news.ycombinator.com/item?id=4470283
+
+" Nice status line
+Bundle 'Lokaltog/vim-powerline'
+" Powerline settings
+set laststatus=2   " Always show the statusline
+set encoding=utf-8 " Necessary to show Unicode glyphs
+set t_Co=256 " Explicitly tell Vim that the terminal supports 256 colors
+
+
 
 " I like filetype guessing and syntax highlighting now.
 " (Vundle is now loaded so can turn filetype on.)
