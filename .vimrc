@@ -1,4 +1,16 @@
-call pathogen#infect()
+" Must turn off filetype before loading Vundle, apparently.
+filetype off
+set runtimepath+=~/.vim/bundle/vundle/
+call vundle#rc()
+
+" Bundles to install, Vundle must be listed here.
+Bundle 'gmarik/vundle'
+Bundle 'scrooloose/nerdcommenter'
+
+" I like filetype guessing and syntax highlighting now.
+" (Vundle is now loaded so can turn filetype on.)
+filetype plugin indent on
+syntax on
 
 "colorscheme koehler
 colorscheme delek
@@ -11,10 +23,6 @@ set viminfo=
 set backspace=2
 set ruler
 set printoptions=paper:letter
-
-" I like filetype guessing and syntax highlighting now.
-filetype plugin indent on
-syntax on
 
 " Mail settings
 aug new_mail
