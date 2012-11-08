@@ -34,7 +34,6 @@ set encoding=utf-8 " Necessary to show Unicode glyphs
 set t_Co=256 " Explicitly tell Vim that the terminal supports 256 colors
 
 
-
 " I like filetype guessing and syntax highlighting now.
 " (Vundle is now loaded so can turn filetype on.)
 filetype plugin indent on
