@@ -385,4 +385,34 @@ if [ -s "$HOME/.rvm/scripts/rvm" ]; then
 fi
 
 # z: https://github.com/rupa/z
-[ -r "$HOME/.z.sh" ] && . "$HOME/.z.sh"
+#[ -r "$HOME/.z.sh" ] && . "$HOME/.z.sh"
+
+# fasd: https://github.com/clvv/fasd
+eval "$(fasd --init auto)"
+
+# I like cd to print the full path of where I just changed to.  I
+# don't see a built-in for this in bash.
+#
+# We take care to possibly wrap a cd which is already a function, such
+# as the function RVM (above) installs.  That's why this is so far
+# down in the file.
+if [ "$(type -t cd)" = "function" ]; then
+	real_cd=_cd_before_printing_pwd
+	# Recipe for copying a function (in lieu of renaming) from
+	# http://stackoverflow.com/questions/1203583/how-do-i-rename-a-bash-function
+	eval "$(echo 'function' $real_cd; declare -f cd | tail -n +2)"
+else
+	real_cd="builtin cd"
+fi
+
+# eval'ing the function so I can unset real_cd afterwards.
+# Redirecting cd into /dev/null because "cd -" already prints PWD.
+# (CDPATH may also cause it to print a directory, I think.  I'm using
+# CDPATH.)
+eval '
+cd () {
+	'"$real_cd"' "$@" >/dev/null && echo "$PWD"
+}
+'
+
+unset real_cd
