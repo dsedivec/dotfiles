@@ -61,4 +61,6 @@ au User all syntax on
 aug END
 au BufRead mutt[-A-Za-z0-9]* do new_mail User all
 
+au FileType gitcommit setlocal spell
+
 let c_space_errors=1
