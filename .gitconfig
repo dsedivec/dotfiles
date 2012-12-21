@@ -39,6 +39,7 @@
 	co = checkout
 	dt = difftool
 	dtom = difftool origin/master
+	wdiff = diff --word-diff
 	spush = !git-spush
 [rebase]
 	autosquash = 1
