@@ -375,7 +375,9 @@ fi
 #[ -r "$HOME/.z.sh" ] && . "$HOME/.z.sh"
 
 # fasd: https://github.com/clvv/fasd
-eval "$(fasd --init auto)"
+if which fasd &> /dev/null; then
+	eval "$(fasd --init auto)"
+fi
 
 # I like cd to print the full path of where I just changed to.  I
 # don't see a built-in for this in bash.
