@@ -241,19 +241,6 @@ fi
 VISUAL="$EDITOR"
 export VISUAL EDITOR
 
-# Emacs on OS X.
-emacs_app=$HOME/Applications/Emacs.app/Contents/MacOS/Emacs
-if [ -x "$emacs_app" ]; then
-	export EMACS=$emacs_app
-
-	emacsclient=$HOME/bin/emacsclient
-	if [ -x "$emacsclient" ]; then
-		export EMACSCLIENT=$emacsclient
-	fi
-	unset emacsclient
-fi
-unset emacs_app
-
 ### SSH agent forwarding under a long running screen
 
 # We need to know where our Screen FIFOs are kept so we can check for
