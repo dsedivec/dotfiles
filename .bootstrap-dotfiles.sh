@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e || exit 1
+set -ex || exit 1
 git clone git@github.com:dsedivec/dotfiles.git ~/dotfiles
 rsync -av ~/dotfiles/ ~/
 rm -rf ~/dotfiles
