@@ -9,6 +9,11 @@ call vundle#rc()
 " Bundles to install, Vundle must be listed here.
 Bundle 'gmarik/vundle'
 Bundle 'scrooloose/nerdcommenter'
+Bundle 'Lokaltog/vim-easymotion'
+
+Bundle 'jamessan/vim-gnupg'
+let g:GPGUseAgent=1
+let g:GPGPreferSymmetric=1
 
 " Recommended by
 " http://www.vimninjas.com/2012/09/03/5-plugins-you-should-put-in-your-vimrc/
@@ -43,6 +48,13 @@ syntax on
 colorscheme delek
 
 set nohlsearch
+set incsearch
+" Both work together
+set ignorecase smartcase
+" Necessary?
+set nocompatible
+" Allow switching away from a modified buffer
+set hidden
 set viminfo=
 " This is backwards-compatible (to Vim 5) backspace
 " setting.  In Vim 6 I believe it's equivalent to
@@ -50,6 +62,7 @@ set viminfo=
 set backspace=2
 set ruler
 set printoptions=paper:letter
+set mouse=a
 
 " Mail settings
 aug new_mail
