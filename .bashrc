@@ -365,6 +365,21 @@ fi
 unset is_available
 unset LIB
 
+# Some Python commands for working with virtualenvs.
+
+WORKON_HOME=${WORKON_HOME:-$HOME/.vpy}
+
+workon() {
+	if [ $# -ne 1 ]; then
+		echo "usage: $FUNCNAME <virtualenv name>" >&2
+		return 1
+	fi
+	if [ "$(type -t deactivate)" = "function" ]; then
+		deactivate
+	fi
+	. "$WORKON_HOME"/$1/bin/activate
+}
+
 # RVM
 if [ -s "$HOME/.rvm/scripts/rvm" ]; then
 	. "$HOME/.rvm/scripts/rvm"
