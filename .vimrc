@@ -11,9 +11,11 @@ Bundle 'gmarik/vundle'
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'Lokaltog/vim-easymotion'
 
-Bundle 'jamessan/vim-gnupg'
-let g:GPGUseAgent=1
-let g:GPGPreferSymmetric=1
+if version >= 702
+	Bundle 'jamessan/vim-gnupg'
+	let g:GPGUseAgent=1
+	let g:GPGPreferSymmetric=1
+endif
 
 " Recommended by
 " http://www.vimninjas.com/2012/09/03/5-plugins-you-should-put-in-your-vimrc/
@@ -31,7 +33,8 @@ Bundle 'scrooloose/syntastic'
 
 " Recommended by https://news.ycombinator.com/item?id=4470283
 
-" Nice status line
+" Nice status line.  Note: probably only works with Vim >= 7.2.
+" Seems harmless on 7.0 though.
 Bundle 'Lokaltog/vim-powerline'
 " Powerline settings
 set laststatus=2   " Always show the statusline
