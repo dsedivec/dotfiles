@@ -374,10 +374,16 @@ workon() {
 		echo "usage: $FUNCNAME <virtualenv name>" >&2
 		return 1
 	fi
-	if [ "$(type -t deactivate)" = "function" ]; then
-		deactivate
+	local activate=$WORKON_HOME/$1/bin/activate
+	if [ -r "$activate" ]; then
+		if [ "$(type -t deactivate)" = "function" ]; then
+			deactivate
+		fi
+		. "$activate"
+	else
+		echo "can't find virtualenv '$1'" >&2
+		return 1
 	fi
-	. "$WORKON_HOME"/$1/bin/activate
 }
 
 # RVM
