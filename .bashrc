@@ -367,7 +367,7 @@ unset LIB
 
 # Some Python commands for working with virtualenvs.
 
-WORKON_HOME=${WORKON_HOME:-$HOME/.vpy}
+export WORKON_HOME=${WORKON_HOME:-$HOME/.vpy}
 
 workon() {
 	if [ $# -ne 1 ]; then
