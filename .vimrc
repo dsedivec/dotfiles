@@ -10,6 +10,11 @@ call vundle#rc()
 Bundle 'gmarik/vundle'
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'Lokaltog/vim-easymotion'
+Bundle 'mileszs/ack.vim'
+" Lets you kill a buffer without killing its window.
+" Try :BW (instead of :bw)
+Bundle 'bufkill.vim'
+Bundle 'bufexplorer.zip'
 
 if version >= 702
 	Bundle 'jamessan/vim-gnupg'
