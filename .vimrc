@@ -83,4 +83,6 @@ au BufRead mutt[-A-Za-z0-9]* do new_mail User all
 
 au FileType gitcommit setlocal spell
 
+au FileType sh setlocal ts=4 sw=4
+
 let c_space_errors=1
