@@ -1,3 +1,4 @@
 --pager=less
---type-set=coffee=.coffee
 --smart-case
+--type-set=coffee=.coffee
+--type-set=conf=.conf,.ini
