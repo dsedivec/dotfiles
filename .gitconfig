@@ -43,6 +43,8 @@
 	co = checkout
 	dt = difftool
 	dtom = difftool origin/master
+	dtm = difftool master
+	dtu = difftool @{upstream}
 	wdiff = diff --word-diff
 [rebase]
 	autosquash = 1
