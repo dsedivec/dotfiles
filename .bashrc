@@ -1,13 +1,10 @@
-# For now, I don't feel bad about using bash-isms here.
+# Unlike my usual shell tendency to write for some common denominator
+# of shells, this file is called ".bashrc" so I have no compunctions
+# about using Bash-ishms here.
 
-# Source global definitions
-if [ -r /etc/bashrc ]; then
-	# RH, FC
-	. /etc/bashrc
-elif [ -r /etc/bash.bashrc ]; then
-	# Debian
-	. /etc/bash.bashrc
-fi
+
+######################################################################
+### Loading up other people's ideas of what should be in my bashrc.
 
 # Use bash_completion.  I think this was stolen from Ubuntu's
 # /etc/skel/.bashrc.
@@ -19,7 +16,7 @@ fi
 #
 # This is loaded before the SSC developer's .bashrc (below) so it can
 # pick up that we have the Git completion stuff.
-if [ "x$BASH_COMPLETION" = "x" -o ! -r "$BASH_COMPLETION" ]; then
+if [ -z "$BASH_COMPLETION" -o ! -r "$BASH_COMPLETION" ]; then
 	for dir in /etc /opt/local/etc; do
 		script=$dir/bash_completion
 		if [ -r "$script" ]; then
@@ -30,16 +27,29 @@ if [ "x$BASH_COMPLETION" = "x" -o ! -r "$BASH_COMPLETION" ]; then
 	unset dir script
 fi
 
-# SSC bashrc.  This is probably purposely above everything else so
-# that I can override any of its settings that I don't care for.
+# SSC bashrc.  This is probably purposely above almost everything else
+# so that I can override any of its settings that I don't care for.
 ssc_bashrc=~/git/system/dotfiles/developer-bashrc
 [ -r "$ssc_bashrc" ] && . "$ssc_bashrc"
 unset ssc_bashrc
+# That loaded a lot of aliases that I don't need, let's just clear out
+# aliases entirely.
+unalias -a
+# Our Java 1.4 really screws with my Clojure development
+unset JAVA_HOME
 
-# Other SSC variables (which may be used further on in this .bashrc!).
-# (I don't actually know if this is used _outside_ of this .bashrc.)
-POSTGRESQL=$HOME/pgsql
-export POSTGRESQL
+# Source global definitions
+if [ -r /etc/bashrc ]; then
+	# RH, FC
+	. /etc/bashrc
+elif [ -r /etc/bash.bashrc ]; then
+	# Debian
+	. /etc/bash.bashrc
+fi
+
+
+######################################################################
+### Useful functions for this bashrc.  May be unset on our way out.
 
 # Tests if a program is available.
 is_available () {
@@ -48,7 +58,19 @@ is_available () {
 	return $?
 }  # is_available
 
-if [ -e /lib64 -o -d /usr/lib64 ] && [ "x`uname -i`" = "xx86_64" ]; then
+
+######################################################################
+### PATH
+
+# Some SSC scripts use this I _think_.  I also use it here building up
+# my PATH.
+POSTGRESQL=$HOME/pgsql
+export POSTGRESQL
+
+# Note use of && here to short-circuit calling uname -i when the
+# directories aren't found, which is useful on OS X where uname -i
+# creates an error (and where neither of the lib64 directories exist).
+if [ -e /lib64 -o -d /usr/lib64 ] && [ "$(uname -i)" = "x86_64" ]; then
 	LIB="lib64"
 else
 	LIB="lib"
@@ -73,6 +95,9 @@ PATH=$HOME/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
 # including sbins.  We also add on /usr/games for OpenBSD.
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/games
+
+# Done with this now.
+unset LIB
 
 # Now we're going to remove duplicates and non-existent directories
 # from the PATH.
@@ -126,6 +151,10 @@ vipath() {
 	fi
 }
 
+
+######################################################################
+### General settings
+
 # Copied from FC5 /etc/bashrc.
 # are we an interactive shell?
 if [ "$PS1" ]; then
@@ -154,11 +183,45 @@ shopt -s checkwinsize
 # I like this on so I can use negative globbing.
 shopt -s extglob
 
+export TZ=America/Chicago
+export LC_COLLATE=C
+
+if [ -d $HOME/Maildir/ ]
+then
+	MAIL=$HOME/Maildir/
+elif [ -d $HOME/Mailbox ]
+then
+	MAIL=$HOME/Mailbox
+fi
+
+# On OS X 10.5[.3, at least] things other than Terminal.app seem to be
+# getting COMMAND_MODE=legacy.  This changes what get_compat returns,
+# which several OS X tools use.  For example, with
+# COMMAND_MODE=legacy, "crontab -r" prompts to ask if you want to
+# remove your crontab.
+if [ "$(uname -s)" = "Darwin" ]; then
+	release=$(uname -r)
+	major=${release%%.*}
+	# Only apply to Darwin >= 9, which should correspond to Mac OS X
+	# >= 10.5.  (Is this needed on OS X 10.4?  I never had a
+	# problem on 10.4 that I could attribute to this setting.)
+	if [ "$major" -ge 9 ]; then
+		COMMAND_MODE=unix2003
+		export COMMAND_MODE
+	fi
+	unset release major minor
+fi
+
 umask 007
 ulimit -c unlimited
 
+
+######################################################################
+### Setup for other programs
+
 # Newer sudo changes umask behavior.  This restores the old behavior
-# and keeps people at work from yelling at me.
+# and keeps people at work from yelling at me when I touch critical
+# files under sudo and accidentally tighten their permissions.
 SUDO=$(which sudo)
 if [ $? -eq 0 ]; then
 	sudo() {
@@ -171,12 +234,6 @@ if [ $? -eq 0 ]; then
 		return $status
 	}
 fi
-
-TZ=America/Chicago
-export TZ
-
-LC_COLLATE=C
-export LC_COLLATE
 
 # Which ls to use.  MacPorts GNU ls is "gls" and that'll give us all
 # the options and colors we're used to.
@@ -192,35 +249,27 @@ export LS_FLAGS
 
 # You can't define a function called ls if there is an alias for ls.
 # Fedora's /etc/profile.d/colorls.sh does this automatically.
-[ "x$(type -t ls)" = "xalias" ] && unalias ls
+[ "$(type -t ls)" = "alias" ] && unalias ls
 # LS_FLAGS is used un-quoted to get word splitting.
 ls() { command "$LS" $LS_FLAGS "$@"; }
 
 # Enable color support in GNU ls.  dircolors taken from Ubuntu
 # /etc/skel/.bashrc.
 if [ "$TERM" != "dumb" ] && is_available "$dircolors"; then
-	eval `"$dircolors" --sh "$HOME/.dircolors"`
+	eval $("$dircolors" --sh "$HOME/.dircolors")
 	LS_FLAGS="$LS_FLAGS --color=auto"
 fi
 
-# Don't need this anymore.
+# Done with this variable.
 unset dircolors
-
-if [ -d $HOME/Maildir/ ]
-then
-	MAIL=$HOME/Maildir/
-elif [ -d $HOME/Mailbox ]
-then
-	MAIL=$HOME/Mailbox
-fi
 
 if is_available less
 then
 	PAGER=less
 	export PAGER
 
-	# Make colors work in less (under OS X; works under Linux, don't
-	# know why).
+	# Make colors work in less (under OS X; works without this under
+	# Linux I think, don't know why).
 	LESS="$LESS -RF"
 	export LESS
 
@@ -241,6 +290,11 @@ fi
 VISUAL="$EDITOR"
 export VISUAL EDITOR
 
+# I wish there was such thing as ~/.agrc.
+alias ag="ag --pager=less"
+
+
+######################################################################
 ### SSH agent forwarding under a long running screen
 
 # We need to know where our Screen FIFOs are kept so we can check for
@@ -260,7 +314,7 @@ do
 done
 
 sshscreen() {
-	if [ "x$STY" != "x" ]; then
+	if [ -n "$STY" ]; then
 		echo "don't use sshscreen from inside screen" >&2
 		return 1
 	fi
@@ -273,20 +327,20 @@ sshscreen() {
 	local OPTIND=1 opt pattern session num_sessions sock
 	local create=0 reattach=0 set_name=""
 	while getopts ":r:x:d:R:D:S:" opt; do
-		if [ "x${opt##[rxdRD]}" = "x" ]; then
+		if [ -z "${opt##[rxdRD]}" ]; then
 			reattach=1
-			if [ "x${OPTARG##-[a-zA-Z]}" = "x" ]; then
+			if [ -z "${OPTARG##-[a-zA-Z]}" ]; then
 				OPTIND=$(($OPTIND - 1))
 			else
 				pattern="-S $OPTARG"
 			fi
-		elif [ "x$opt" = "x:" -a "x${OPTARG##[rxdRD]}" = "x" ]; then
+		elif [ "$opt" = ":" -a -z "${OPTARG##[rxdRD]}" ]; then
 			# Reattach option with no option argument.
 			reattach=1
-		elif [ "x$opt" = "xS" ]; then
+		elif [ "$opt" = "S" ]; then
 			create=1
 			session="$OPTARG"
-		elif [ "x$opt" = "x:" -a "x$OPTARG" = "xS" ]; then
+		elif [ "$opt" = ":" -a "$OPTARG" = "S" ]; then
 			echo "-S requires an argument" >&2
 			return 1
 		fi
@@ -333,7 +387,7 @@ sshscreen() {
 	fi
 
 	sock=$(get_screen_auth_sock "$session")
-	if [ -e "$SSH_AUTH_SOCK" ] && [ ! -e "$sock" -o -L "$sock" ]; then
+	if [ -e "$SSH_AUTH_SOCK" -a \( ! -e "$sock" -o -L "$sock" \) ]; then
 		ln -sf "$SSH_AUTH_SOCK" "$sock"
 	fi
 
@@ -342,30 +396,13 @@ sshscreen() {
 	SSH_AUTH_SOCK=$sock screen $set_name "$@"
 }
 
-# On OS X 10.5[.3, at least] things other than Terminal.app seem to be
-# getting COMMAND_MODE=legacy.  This changes what get_compat returns,
-# which several OS X tools use.  For example, with
-# COMMAND_MODE=legacy, "crontab -r" prompts to ask if you want to
-# remove your crontab.
-if [ "x$(uname -s)" = "xDarwin" ]; then
-	release=$(uname -r)
-	major=${release%%.*}
-	minor=${release#*.}
-	minor=${minor%%.*}
-	# Only apply to Darwin >= 9, which should correspond to Mac OS X
-	# >= 10.5.  (Is this needed on OS X 10.4?  I never had a
-	# problem on 10.4 that I could attribute to this setting.)
-	if [ "$major" -ge 9 ]; then
-		COMMAND_MODE=unix2003
-		export COMMAND_MODE
-	fi
-	unset release major minor
-fi
 
-unset is_available
-unset LIB
+######################################################################
+### Python commands to work with virtualenv
 
-# Some Python commands for working with virtualenvs.
+# I know there are some packages that do exactly what I'm doing below,
+# and more on top of it.  I just don't feel like installing them on
+# all the systems I use when the below works pretty darn well.
 
 export WORKON_HOME=${WORKON_HOME:-$HOME/.vpy}
 
@@ -386,14 +423,20 @@ workon() {
 	fi
 }
 
-# RVM
+
+######################################################################
+### RVM
+
 if [ -s "$HOME/.rvm/scripts/rvm" ]; then
 	. "$HOME/.rvm/scripts/rvm"
 	PATH=$PATH:$HOME/.rvm/bin
 fi
 
-# z: https://github.com/rupa/z
-#[ -r "$HOME/.z.sh" ] && . "$HOME/.z.sh"
+
+######################################################################
+### Aids for changing directories
+
+# This is all below RVM, which modifies the cd command.
 
 # fasd: https://github.com/clvv/fasd
 if which fasd &> /dev/null; then
@@ -426,3 +469,9 @@ cd () {
 '
 
 unset real_cd
+
+
+######################################################################
+### Cleanup
+
+unset is_available
