@@ -291,7 +291,7 @@ VISUAL="$EDITOR"
 export VISUAL EDITOR
 
 # I wish there was such thing as ~/.agrc.
-alias ag="ag --pager=less"
+alias ag="ag --pager=less --smart-case"
 
 
 ######################################################################
