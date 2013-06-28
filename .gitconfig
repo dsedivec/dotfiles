@@ -17,6 +17,7 @@
 	tool = opendiff
 	guitool = opendiff
 	renames = copies
+	algorithm = histogram
 [apply]
 	whitespace = error
 [alias]
