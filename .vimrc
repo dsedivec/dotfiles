@@ -85,4 +85,6 @@ au FileType gitcommit setlocal spell
 
 au FileType sh setlocal ts=4 sw=4
 
+au FileType python setlocal et sw=4 ts=4 ai si sm
+
 let c_space_errors=1
