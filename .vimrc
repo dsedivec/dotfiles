@@ -15,6 +15,8 @@ Bundle 'mileszs/ack.vim'
 " Try :BW (instead of :bw)
 Bundle 'bufkill.vim'
 Bundle 'bufexplorer.zip'
+" Bsgrep!
+Bundle 'jeetsukumaran/vim-buffersaurus'
 
 if version >= 702
 	Bundle 'jamessan/vim-gnupg'
