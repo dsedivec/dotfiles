@@ -13,3 +13,5 @@ set visible-stats on
 set match-hidden-files off
 set completion-ignore-case on
 $endif
+
+set show-all-if-ambiguous on
