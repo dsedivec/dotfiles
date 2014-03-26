@@ -13,10 +13,13 @@ Bundle 'Lokaltog/vim-easymotion'
 Bundle 'mileszs/ack.vim'
 " Lets you kill a buffer without killing its window.
 " Try :BW (instead of :bw)
+" Possible alternative: https://github.com/moll/vim-bbye
 Bundle 'bufkill.vim'
 Bundle 'bufexplorer.zip'
 " Bsgrep!
 Bundle 'jeetsukumaran/vim-buffersaurus'
+" :Ag
+Bundle 'rking/ag.vim'
 
 if version >= 702
 	Bundle 'jamessan/vim-gnupg'
@@ -88,5 +91,9 @@ au FileType gitcommit setlocal spell
 au FileType sh setlocal ts=4 sw=4
 
 au FileType python setlocal et sw=4 ts=4 ai si sm
+
+" Fix for editing crontab with vim under OS X.
+" http://vim.wikia.com/wiki/Editing_crontab
+au BufEnter /private/tmp/crontab.* setlocal backupcopy=yes
 
 let c_space_errors=1
