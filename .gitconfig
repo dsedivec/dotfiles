@@ -77,3 +77,9 @@
 	lsu = log --stat ^@{upstream} HEAD
 [rebase]
 	autosquash = 1
+[status]
+	# This is the default, but without this Magit will try and
+	# show all untracked files, even descending into
+	# untracked directories, which can make for a very big
+	# buffer.
+	showUntrackedFiles = normal
