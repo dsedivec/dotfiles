@@ -38,13 +38,15 @@ unalias -a
 # Our Java 1.4 really screws with my Clojure development
 unset JAVA_HOME
 
-# Source global definitions
-if [ -r /etc/bashrc ]; then
+# Source global definitions.  Note that Debian/Ubuntu may have
+# /etc/bash.bashrc, but if they do then their version of Bash is
+# configured with a compile-time option to execute that file
+# automatically, so no need to consider it here.
+#
+# OS X has an /etc/profile that executes /etc/bashrc--naughty!
+if [ -r /etc/bashrc ] && [ "$(uname -s)" != "Darwin" ]; then
 	# RH, FC
 	. /etc/bashrc
-elif [ -r /etc/bash.bashrc ]; then
-	# Debian
-	. /etc/bash.bashrc
 fi
 
 
