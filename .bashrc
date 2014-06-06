@@ -439,11 +439,23 @@ sshscreen() {
 
 
 ######################################################################
-### Python commands to work with virtualenv
+### Python
 
-# I know there are some packages that do exactly what I'm doing below,
-# and more on top of it.  I just don't feel like installing them on
-# all the systems I use when the below works pretty darn well.
+# Strip empty string and "." out of PYTHONPATH, put there by my
+# company's bashrc (see near top).  Remove any duplicates while I'm at
+# it.  (Awk trick suggested by several places, but
+# http://unix.stackexchange.com/a/14896 was the one that hooked me.
+# Maybe I should change my PATH stuff up top to do this instead of
+# manipulating IFS.)
+PYTHONPATH=$(echo -n $PYTHONPATH |
+	awk -v RS=: -v ORS=: '!p[$0]++ && $0 !~ /^\.?$/')
+# Damn that trailing ORS.
+PYTHONPATH=${PYTHONPATH%:}
+
+# "workon" makes it easy to switch virtualenvs.  I know there are some
+# packages that do exactly what I'm doing below, and more on top of
+# it.  I just don't feel like installing them on all the systems I use
+# when the below works pretty darn well.
 
 export WORKON_HOME=${WORKON_HOME:-$HOME/.vpy}
 
