@@ -92,6 +92,13 @@ PATH=/usr/local/bin:/usr/local/sbin:$PATH
 PATH=$POSTGRESQL/bin:$PATH
 # The various places ccache might get installed.
 PATH=$HOME/ccache-bin:/usr/$LIB/ccache:/opt/local/libexec/ccache:$PATH
+# rbenv.  We add its shims directory ourselves, because if we don't,
+# subsequent invocations of the shell will find the shims directory
+# pushed to the end of the PATH, and then rbenv won't try and put it
+# nearer the front of the path, and then shit breaks because ruby gets
+# found in /usr/bin before ~/.rbenv/shims/ruby.  I should probably
+# file a bug in rbenv?
+PATH=$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH
 # Finally, ~/bin always goes first.
 PATH=$HOME/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
@@ -433,6 +440,12 @@ if [ -s "$HOME/.rvm/scripts/rvm" ]; then
 	. "$HOME/.rvm/scripts/rvm"
 fi
 
+######################################################################
+### rbenv
+
+if [ -r ~/.rbenv/bin/rbenv ]; then
+	eval "$(rbenv init -)"
+fi
 
 ######################################################################
 ### Aids for changing directories
