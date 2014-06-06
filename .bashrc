@@ -302,6 +302,38 @@ export VISUAL EDITOR
 # I wish there was such thing as ~/.agrc.
 alias ag="ag --pager=less --smart-case"
 
+# Open ag results in Vim or Emacs.  Vim requires ag.vim from
+# https://github.com/rking/ag.vim, Emacs requires ag.el from
+# https://github.com/Wilfred/ag.el as well as (my:focus-emacs) from
+# https://github.com/dsedivec/dot-emacs-d/blob/master/lisp/my/general-config.el.
+vag() {
+	local -a quoted_args=()
+	for arg in "$@"; do
+		quoted_args+=("$(printf %q "$arg")")
+	done
+	vim -c ":Ag! ${quoted_args[*]}" -c ":only"
+}
+
+eag() {
+	local quoted_arg quoted_pwd
+	local -a quoted_args=()
+	for arg in "$@"; do
+		quoted_arg=$(printf %q "$arg")
+		# Great, you've quoted for the shell.  Now quote for Emacs.
+		quoted_arg=${quoted_arg//\\/\\\\}
+		quoted_arg=${quoted_arg//\"/\\\"}
+		quoted_args+=("$quoted_arg")
+	done
+	quoted_pwd=$(printf %q "$PWD")
+	quoted_pwd=${quoted_pwd//\\/\\\\}
+	quoted_pwd=${quoted_pwd//\"/\\\"}
+	emacsclient --eval "
+		(progn
+		  (compilation-start \"cd $quoted_pwd; ag --smart-case --color --color-match '30;43' --column --nogroup ${quoted_args[*]}\" 'ag-mode)
+		  (pop-to-buffer \"*ag*\")
+		  (my:focus-emacs))
+	"
+}
 
 ######################################################################
 ### SSH agent forwarding under a long running screen
@@ -483,6 +515,45 @@ cd () {
 '
 
 unset real_cd
+
+
+######################################################################
+### Other cute commands
+
+vimkill () {
+	local temp_file
+	temp_file=$(mktemp -t vimkillXXXXXXXXXX)
+	if [ $? -ne 0 ]; then
+		echo "mktemp failed" >&2
+		return 1
+	fi
+	if ! pgrep -fl "$@" > "$temp_file"; then
+		rm "$temp_file"
+		echo "no matching processes found" >&2
+		return 1
+	fi
+	cat >> "$temp_file" <<-EOF
+		# Delete lines you don't want
+		# Feel free to add additional PIDs, one per line
+		# Lines that don't start with a number will be ignored
+		# Exit non-zero (Vim: :cquit) to abort or just delete all lines
+		EOF
+	local status=1
+	if "${EDITOR:-vi}" "$temp_file"; then
+		pids=$(awk -v ORS=' ' '/^[0-9]+/{print $1}' "$temp_file")
+		if [ -n "$pids" ]; then
+			echo "Killing $pids"
+			kill "$pids"
+			status=$?
+		else
+			echo "no PIDs to kill" >&2
+		fi
+	else
+		echo "editor exited non-zero, nothing killed" >&2
+	fi
+	rm "$temp_file"
+	return $status
+}
 
 
 ######################################################################
