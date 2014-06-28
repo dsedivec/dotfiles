@@ -32,7 +32,11 @@ load-plugins=
 # Disable the message, report, category or checker with the given id(s). You
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time.
-disable=W0312,C0111,W0703
+# W0312: mixed space/tab indentation, necessary if you use tabs but
+#        use spaces to line things up
+# C0111: missing module, function, class, or method docstring
+disable=W0312,C0111
+#,W0703,C0103,R0904
 
 
 [REPORTS]
