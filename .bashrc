@@ -277,9 +277,8 @@ then
 	PAGER=less
 	export PAGER
 
-	# Make colors work in less (under OS X; works without this under
-	# Linux I think, don't know why).
-	LESS="$LESS -RF"
+	# Make colors work in ag when it uses less as a pager in OS X/iTerm 2.
+	LESS="$LESS -R"
 	export LESS
 
 	# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.  RH/Fedora
