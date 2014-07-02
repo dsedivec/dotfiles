@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import sys
+import random
+import os.path
+
+
+def main():
+    if len(sys.argv) == 1:
+        num_words = 20
+    elif len(sys.argv) == 2:
+        num_words = int(sys.argv[1])
+    else:
+        my_name = os.path.basename(sys.argv[0])
+        print >>sys.stderr, "usage: %s [<num words>]" % (my_name,)
+        sys.exit(1)
+    words = [line.strip() for line in open("/usr/share/dict/words", "rt")]
+    random.shuffle(words)
+    for idx in range(num_words):
+        print words[idx]
+
+
+if __name__ == "__main__":
+    main()

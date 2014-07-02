@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import os
+import os.path
+import urllib
+import json
+import shutil
+import subprocess
+
+
+def download_virtualenv(dest_dir):
+    print "attempting to download virtualenv"
+    virtualenv_info = json.load(urllib.urlopen(
+        "https://pypi.python.org/pypi/virtualenv/json"))
+    dir_name = "virtualenv-%s" % (virtualenv_info["info"]["version"],)
+    for package in virtualenv_info["urls"]:
+        if package["packagetype"] == "sdist":
+            break
+    else:
+        raise Exception("can't find sdist for virtualenv")
+    print "will download %s" % (package["url"],)
+    archive_path = os.path.join(dest_dir, package["filename"])
+    archive = open(archive_path, "wb")
+    remote_archive = urllib.urlopen(package["url"])
+    shutil.copyfileobj(remote_archive, archive)
+    archive.close()
+    remote_archive.close()
+    print "extracting %s" % (archive_path,)
+    # Going to depend on GNU tar to do our work for us here.
+    subprocess.check_call(["tar", "-C", dest_dir, "-xf", archive_path])
+    os.symlink(os.path.join(dir_name, "virtualenv.py"),
+               os.path.join(dest_dir, "virtualenv.py"))
+
+
+def main():
+    workon_home = os.environ.get("WORKON_HOME")
+    parser = argparse.ArgumentParser()
+    python_args = parser.add_mutually_exclusive_group()
+    python_args.add_argument("--python", "-p", default=sys.executable)
+    python_args.add_argument("--python-version", "-V")
+    parser.add_argument("--root-dir", "-r", "-d", default=workon_home,
+                        required=not workon_home)
+    parser.add_argument("--virtualenv-script", "--vs")
+    parser.add_argument("--force", "-f", default=False, action="store_true")
+    parser.add_argument("env_name")
+    args = parser.parse_args()
+    if args.python_version:
+        python_exe = "python%s" % (args.python_version,)
+    else:
+        python_exe = args.python
+    if args.root_dir is None:
+        raise Exception("set WORKON_HOME or specify --root-dir")
+    virtualenv_script = args.virtualenv_script
+    if virtualenv_script is None:
+        virtualenv_script = os.path.join(args.root_dir, "virtualenv.py")
+        if not os.path.exists(virtualenv_script):
+            download_virtualenv(args.root_dir)
+    virtualenv_path = os.path.join(args.root_dir, args.env_name)
+    if os.path.exists(virtualenv_path) and not args.force:
+        raise Exception("refusing to overwrite existing %r" %
+                        (virtualenv_path,))
+    command = [python_exe, virtualenv_script, "--distribute",
+               virtualenv_path]
+    print "executing: %s" % (" ".join(command),)
+    os.execvp(command[0], command)
+    raise Exception("should never get here")
+
+
+if __name__ == "__main__":
+    main()
