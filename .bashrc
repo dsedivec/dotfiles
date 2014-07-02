@@ -277,8 +277,15 @@ then
 	PAGER=less
 	export PAGER
 
-	# Make colors work in ag when it uses less as a pager in OS X/iTerm 2.
-	LESS="$LESS -R"
+	# -R makes colors work in ag when it uses less as a pager in OS
+	# X/iTerm 2.  -F makes less exit when all the output fits on a
+	# single screen, which is nice when doing something like "git log
+	# --oneline -1".  Just make sure to turn off alternate screen
+	# clearing (e.g. "Disable save/restore alternate screen" in
+	# iTerm2) otherwise you'll do "git log --oneline -1" and then
+	# you'll see no output until you think to try something like
+	# "git log --oneline -1 | cat".
+	LESS="$LESS -RF"
 	export LESS
 
 	# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.  RH/Fedora
