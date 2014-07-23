@@ -561,7 +561,7 @@ vimkill () {
 		pids=$(awk -v ORS=' ' '/^[0-9]+/{print $1}' "$temp_file")
 		if [ -n "$pids" ]; then
 			echo "Killing $pids"
-			kill "$pids"
+			kill $pids
 			status=$?
 		else
 			echo "no PIDs to kill" >&2
