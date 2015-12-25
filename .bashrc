@@ -182,7 +182,7 @@ fi
 
 # Stolen from Ubuntu: don't put duplicate lines in the history. See
 # bash(1) for more options
-export HISTCONTROL=ignoredups
+export HISTCONTROL=ignoredups:ignorespace
 
 # check the window size after each command and, if necessary, update
 # the values of LINES and COLUMNS.  (Stolen from Ubuntu; RH/FC does
