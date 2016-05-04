@@ -45,6 +45,7 @@
 	# om = origin/master
 	# lom = last merge with origin/master
 	# u = upstream
+	# p = parent branch (concept at my employer)
 
 	pom = pull origin master
 	pff = pull --ff-only
@@ -53,31 +54,39 @@
 	mom = merge origin/master
 	mff = merge --ff-only
 	mc = merge --no-ff
+	mp = !p=$(git parent-branch) && git merge "$p"
 
 	dm = diff master
 	dom = diff origin/master
 	dlom = diff origin/master...
 	du = diff @{upstream}
+	dp = !p=$(git parent-branch) && git diff "$p"
 
 	ds = diff --stat
 	dsm = diff --stat master
 	dsom = diff --stat origin/master
 	dslom = diff --stat origin/master...
 	dsu = diff --stat @{upstream}
+	dsp = !p=$(git parent-branch) && git ds "$p"
 
 	dt = difftool
 	dtm = difftool master
 	dtom = difftool origin/master
 	dtlom = difftool origin/master...
 	dtu = difftool @{upstream}
+	dtp = !p=$(git parent-branch) && git dt "$p"
 
 	lm = log ^master HEAD
 	lom = log ^origin/master HEAD
 	lu = log ^@{upstream} HEAD
+	lp = !p=$(git parent-branch) && git log "$p"
 
+	ls = log --stat
 	lsm = log --stat ^master HEAD
 	lsom = log --stat ^origin/master HEAD
 	lsu = log --stat ^@{upstream} HEAD
+	lp = !p=$(git parent-branch) && git ls "$p"
+
 [rebase]
 	autosquash = 1
 [status]
