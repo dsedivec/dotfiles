@@ -1,0 +1,4 @@
+#!/bin/bash
+set -ueo pipefail
+defaults write com.apple.FileMerge MergeHeight 0
+exec opendiff "$@"

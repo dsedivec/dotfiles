@@ -18,6 +18,9 @@
 	guitool = opendiff
 	renames = copies
 	algorithm = histogram
+[difftool "opendiff"]
+	# A little script that tries to hide the useless merge pane.
+	path = opendiff-nomerge
 [apply]
 	whitespace = error
 [alias]
