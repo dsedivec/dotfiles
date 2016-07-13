@@ -180,9 +180,14 @@ if [ "$PS1" ]; then
 	export PS1
 fi
 
-# Stolen from Ubuntu: don't put duplicate lines in the history. See
-# bash(1) for more options
-export HISTCONTROL=ignoredups:ignorespace
+
+HISTFILESIZE=1000000
+HISTSIZE=1000000
+HISTCONTROL=ignoredups:ignorespace
+# Show date and time with history lines.
+HISTTIMEFORMAT='%F %T '
+# Append to history.
+shopt -s histappend
 
 # check the window size after each command and, if necessary, update
 # the values of LINES and COLUMNS.  (Stolen from Ubuntu; RH/FC does
