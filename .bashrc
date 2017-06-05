@@ -99,6 +99,10 @@ PATH=$HOME/ccache-bin:/usr/$LIB/ccache:/opt/local/libexec/ccache:$PATH
 # found in /usr/bin before ~/.rbenv/shims/ruby.  I should probably
 # file a bug in rbenv?
 PATH=$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH
+# npm packages installed in my home directory.
+PATH=$HOME/.npm-packages/bin:$PATH
+# Cabal (Haskell; I like ShellCheck)
+PATH=$HOME/.cabal/bin:$PATH
 # Finally, ~/bin always goes first.
 PATH=$HOME/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
@@ -487,6 +491,20 @@ workon() {
 	fi
 }
 
+######################################################################
+### Node.js/npm
+
+npm_man_dir=$HOME/.npm-packages/share/man
+if [ -d "$npm_man_dir" ]; then
+	# Starting this variable with a colon seems to mean "append the
+	# following directories to usual search path," at least on CentOS
+	# 5 and OS X 10.11.  This is usually the desired behavior.
+	# However, it might be more portable to run $(manpath) here
+	# instead of depending on that behavior, which I'm not sure is
+	# documented, at least not on OS X.
+	MANPATH=$MANPATH:$npm_man_dir
+fi
+unset npm_man_dir
 
 ######################################################################
 ### RVM
