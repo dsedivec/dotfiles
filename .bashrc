@@ -240,13 +240,12 @@ ulimit -c unlimited
 # Newer sudo changes umask behavior.  This restores the old behavior
 # and keeps people at work from yelling at me when I touch critical
 # files under sudo and accidentally tighten their permissions.
-SUDO=$(which sudo)
 if [ $? -eq 0 ]; then
 	sudo() {
 		local status old_umask=$(umask)
 		# 0022 is the old default sudo umask, AFAIK.
 		umask 0022
-		"$SUDO" "$@"
+		command sudo "$@"
 		status=$?
 		umask "$old_umask"
 		return $status
