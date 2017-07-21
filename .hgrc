@@ -5,3 +5,5 @@ color =
 pager =
 rebase =
 mq =
+shelve =
+purge =
