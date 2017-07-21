@@ -108,3 +108,5 @@
 	diffFilter = /opt/local/share/git/contrib/diff-highlight/diff-highlight
 [core]
 	pager = /opt/local/share/git/contrib/diff-highlight/diff-highlight | less --tabs=4 -RF
+[grep]
+	patternType = perl
