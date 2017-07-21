@@ -27,6 +27,7 @@
 	ssb = status -sb
 	co = checkout
 	wdiff = diff --word-diff
+	conflicts = diff --name-only --diff-filter=U --relative
 
 	# Verbs:
 	# p = pull
