@@ -85,14 +85,14 @@
 	lm = log ^master HEAD
 	lom = log ^origin/master HEAD
 	lu = log ^@{upstream} HEAD
-	lp = !p=$(git parent-branch) && git log "$p"
+	lp = !p=$(git parent-branch) && git log ^"$p" HEAD
 	lop = !p=$(git parent-branch) && git log ^origin/"$p" HEAD
 
 	ls = log --stat
 	lsm = log --stat ^master HEAD
 	lsom = log --stat ^origin/master HEAD
 	lsu = log --stat ^@{upstream} HEAD
-	lp = !p=$(git parent-branch) && git ls "$p"
+	lsp = !p=$(git parent-branch) && git ls ^"$p" HEAD
 	lsop = !p=$(git parent-branch) && git ls ^origin/"$p" HEAD
 
 [rebase]
