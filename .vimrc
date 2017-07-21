@@ -1,28 +1,24 @@
 " Notes:
 " Leader is \
 
-" Must turn off filetype before loading Vundle, apparently.
-filetype off
-set runtimepath+=~/.vim/bundle/vundle/
-call vundle#rc()
+" vim-plug
+call plug#begin('~/.vim/plugged')
 
-" Bundles to install, Vundle must be listed here.
-Bundle 'gmarik/vundle'
-Bundle 'scrooloose/nerdcommenter'
-Bundle 'Lokaltog/vim-easymotion'
-Bundle 'mileszs/ack.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'Lokaltog/vim-easymotion'
+Plug 'mileszs/ack.vim'
 " Lets you kill a buffer without killing its window.
 " Try :BW (instead of :bw)
 " Possible alternative: https://github.com/moll/vim-bbye
-Bundle 'bufkill.vim'
-Bundle 'bufexplorer.zip'
+Plug 'qpkorr/vim-bufkill'
+Plug 'jlanzarotta/bufexplorer'
 " Bsgrep!
-Bundle 'jeetsukumaran/vim-buffersaurus'
+Plug 'jeetsukumaran/vim-buffersaurus'
 " :Ag
-Bundle 'rking/ag.vim'
+Plug 'rking/ag.vim'
 
 if version >= 702
-	Bundle 'jamessan/vim-gnupg'
+	Plug 'jamessan/vim-gnupg'
 	let g:GPGUseAgent=1
 	let g:GPGPreferSymmetric=1
 endif
@@ -32,30 +28,31 @@ endif
 
 " Surround things with matched pairs
 " https://github.com/tpope/vim-surround/
-Bundle 'tpope/vim-surround'
+Plug 'tpope/vim-surround'
 " Find files.  Pure Vim alternative to Command-T, but try Command-T if this is
 " too slow, perhaps.
 " https://github.com/kien/ctrlp.vim
-Bundle 'kien/ctrlp.vim'
+Plug 'kien/ctrlp.vim'
 " Syntax checking for lots of languages.
 " https://github.com/scrooloose/syntastic
-Bundle 'scrooloose/syntastic'
+Plug 'scrooloose/syntastic'
 
 " Recommended by https://news.ycombinator.com/item?id=4470283
 
 " Nice status line.  Note: probably only works with Vim >= 7.2.
 " Seems harmless on 7.0 though.
-Bundle 'Lokaltog/vim-powerline'
+"Plug 'Lokaltog/vim-powerline'
+" vim-powerline going away in favor of powerline which requires
+" me to install it with Python and pip?  WTF?  Lokaltog
+" refers me to vim-airline.
+Plug 'vim-airline/vim-airline'
 " Powerline settings
 set laststatus=2   " Always show the statusline
 set encoding=utf-8 " Necessary to show Unicode glyphs
 set t_Co=256 " Explicitly tell Vim that the terminal supports 256 colors
 
-
-" I like filetype guessing and syntax highlighting now.
-" (Vundle is now loaded so can turn filetype on.)
-filetype plugin indent on
-syntax on
+call plug#end()
+" Note that vim-plug does "filetype plug indent on" and "syntax enable".
 
 "colorscheme koehler
 colorscheme delek
