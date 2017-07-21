@@ -4,6 +4,8 @@
 " vim-plug
 call plug#begin('~/.vim/plugged')
 
+" Plug-ins
+Plug 'tpope/vim-sensible'
 Plug 'scrooloose/nerdcommenter'
 Plug 'Lokaltog/vim-easymotion'
 Plug 'mileszs/ack.vim'
@@ -58,19 +60,12 @@ call plug#end()
 colorscheme delek
 
 set nohlsearch
-set incsearch
 " Both work together
 set ignorecase smartcase
 " Necessary?
 set nocompatible
 " Allow switching away from a modified buffer
 set hidden
-set viminfo=
-" This is backwards-compatible (to Vim 5) backspace
-" setting.  In Vim 6 I believe it's equivalent to
-"    set backspace=start,eol,indent
-set backspace=2
-set ruler
 set printoptions=paper:letter
 set mouse=a
 
