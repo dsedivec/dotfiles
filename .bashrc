@@ -349,6 +349,15 @@ eag() {
 	"
 }
 
+# Man, ripgrep doesn't even have --pager.
+rg() {
+	if [ -t 1 ]; then
+		command rg --smart-case -p "$@" | "${PAGER:-less}"
+	else
+		command rg --smart-case "$@"
+	fi
+}
+
 ######################################################################
 ### SSH agent forwarding under a long running screen
 
