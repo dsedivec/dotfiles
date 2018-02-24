@@ -1,0 +1,3 @@
+[submodule "bin/.fasd"]
+	path = bin/.fasd
+	url = https://github.com/clvv/fasd
