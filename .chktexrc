@@ -1,0 +1,11 @@
+QuoteStyle = Traditional
+
+# Don't warn about space before \label.
+# https://tex.stackexchange.com/q/264109
+PostLink = {
+}
+
+Silent
+{
+	\slash \blindtext \TopFloatBoxes
+}
