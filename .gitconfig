@@ -105,8 +105,10 @@
 	# buffer.
 	showUntrackedFiles = normal
 [interactive]
-	diffFilter = /opt/local/share/git/contrib/diff-highlight/diff-highlight
+	diffFilter = diff-highlighter
 [core]
-	pager = /opt/local/share/git/contrib/diff-highlight/diff-highlight | less --tabs=4 -RF
+	pager = diff-highlighter | less --tabs=4 -RF
 [grep]
 	patternType = perl
+[diff-so-fancy]
+	markEmptyLines = false
