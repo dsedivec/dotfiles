@@ -375,6 +375,8 @@ if ! command -v telnet >/dev/null; then
 	done
 fi
 
+export YDIFF_OPTIONS='-t 4 --wrap'
+
 ######################################################################
 ### SSH agent forwarding under a long running screen
 
