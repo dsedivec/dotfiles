@@ -344,6 +344,37 @@ fi
 RIPGREP_CONFIG_PATH=$HOME/.rgrc
 export RIPGREP_CONFIG_PATH
 
+if ! command -v telnet >/dev/null; then
+	for telnet_subst in ncat socat nc; do
+		if command -v "$telnet_subst" >/dev/null; then
+			case "$telnet_subst" in
+				ncat | nc)
+					alias telnet="$telnet_subst -v"
+					;;
+
+				socat)
+					telnet() {
+						if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+							echo "telnet is really socat function," \
+							     "host and port only please"
+							return 1
+						fi
+						local host=$1
+						local port
+						if [ $# -eq 2 ]; then
+							port=$2
+						else
+							port=23
+						fi
+						socat -d -d "tcp:$host:$port" stdio
+					}
+					;;
+			esac
+			break
+		fi
+	done
+fi
+
 ######################################################################
 ### SSH agent forwarding under a long running screen
 
