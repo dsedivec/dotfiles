@@ -2,6 +2,8 @@
 " Leader is \
 
 " vim-plug
+" Upgrade vim-plug: :PlugUpgrade
+" Upgrade plugins: :PlugUpdate
 call plug#begin('~/.vim/plugged')
 
 " Plug-ins
