@@ -1,0 +1,4 @@
+nopurge 1
+type radio
+radiomode high,std
+output .
