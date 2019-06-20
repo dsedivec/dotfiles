@@ -1,0 +1,7 @@
+#!/bin/bash
+
+logger "dale's ~/.sleep is running"
+
+# ssh-add -D doesn't work because sleepwatch doesn't know the value
+# of SSH_AUTH_SOCK.
+launchctl stop org.openbsd.ssh-agent
