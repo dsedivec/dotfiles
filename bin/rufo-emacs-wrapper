@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+rufo "$@"
+errcode=$?
+if [[ errcode -eq 3 ]]; then
+	# 3 just means "I changed something".
+	errcode=0
+fi
+exit $errcode
