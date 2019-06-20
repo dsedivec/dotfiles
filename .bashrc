@@ -508,15 +508,18 @@ workon() {
 	fi
 	local activate
 	activate=$WORKON_HOME/$1/bin/activate
-	if [ -r "$activate" ]; then
-		if [ "$(type -t deactivate)" = "function" ]; then
-			deactivate
+	if [ ! -r "$activate" ]; then
+		# Maybe it's a path to a virtual environment.
+		activate=$1/bin/activate
+		if [ ! -r "$activate" ]; then
+			echo "can't find virtualenv '$1'" >&2
+			return 1
 		fi
-		. "$activate"
-	else
-		echo "can't find virtualenv '$1'" >&2
-		return 1
 	fi
+	if [ "$(type -t deactivate)" = "function" ]; then
+		deactivate
+	fi
+	. "$activate"
 }
 
 ######################################################################
