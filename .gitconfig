@@ -1,7 +1,5 @@
 [include]
 	path = ~/.gitconfig.private
-[rerere]
-	enabled = 1
 [color]
 	ui = auto
 [merge]
