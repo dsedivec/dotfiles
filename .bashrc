@@ -506,7 +506,8 @@ workon() {
 		echo "usage: $FUNCNAME <virtualenv name>" >&2
 		return 1
 	fi
-	local activate=$WORKON_HOME/$1/bin/activate
+	local activate
+	activate=$WORKON_HOME/$1/bin/activate
 	if [ -r "$activate" ]; then
 		if [ "$(type -t deactivate)" = "function" ]; then
 			deactivate
