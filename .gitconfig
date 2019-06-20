@@ -4,6 +4,7 @@
 	ui = auto
 [merge]
 	tool = emerge
+	renamelimit = 2048
 [instaweb]
 	port = 4321
 	#httpd = /opt/local/apache2/bin/httpd
