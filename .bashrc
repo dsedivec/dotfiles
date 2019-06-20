@@ -397,7 +397,7 @@ do
 done
 
 sshscreen() {
-	if [ -n "$STY" ]; then
+	if [ -n "${STY:-}" ]; then
 		echo "don't use sshscreen from inside screen" >&2
 		return 1
 	fi
