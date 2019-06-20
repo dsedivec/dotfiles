@@ -116,3 +116,5 @@
 	patternType = perl
 [diff-so-fancy]
 	markEmptyLines = false
+[magit]
+	hideCampaign = true
