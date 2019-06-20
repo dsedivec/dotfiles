@@ -111,6 +111,10 @@ PATH=$HOME/.npm-packages/bin:$PATH
 # think this is some definition of a "standard user's binary
 # directory", not Stack- or Haskell-specific.
 PATH=$HOME/.local/bin:$PATH
+# Go
+GOPATH=$HOME/.go
+export GOPATH
+PATH=$GOPATH/bin:$PATH
 # Finally, ~/bin always goes first.
 PATH=$HOME/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
