@@ -99,6 +99,12 @@ PATH=$HOME/ccache-bin:/usr/$LIB/ccache:/opt/local/libexec/ccache:$PATH
 # found in /usr/bin before ~/.rbenv/shims/ruby.  I should probably
 # file a bug in rbenv?
 PATH=$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH
+# Maybe Ruby gems installed with --user-install.  In my experience,
+# this always yields a directory, even if that directory doesn't
+# exist.
+if command -v ruby >/dev/null; then
+	PATH=$(ruby -r rubygems -e 'puts Gem.user_dir')/bin:$PATH
+fi
 # npm packages installed in my home directory.
 PATH=$HOME/.npm-packages/bin:$PATH
 # Cabal (Haskell; I like ShellCheck)
