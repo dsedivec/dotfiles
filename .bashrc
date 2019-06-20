@@ -557,6 +557,13 @@ fi
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 ######################################################################
+### gopass completion
+
+if command -v gopass >/dev/null; then
+	source <(gopass completion bash)
+fi
+
+######################################################################
 ### Aids for changing directories
 
 # This is all below RVM, which modifies the cd command.
