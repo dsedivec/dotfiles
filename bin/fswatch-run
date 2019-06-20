@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+usage() {
+	cat <<EOF
+usage: $(basename "$0") <fswatch arg>... -- <command...>
+
+<command...> may include {} for the file that was changed.
+
+Selected fswatch args:
+
+ path...               Paths to watch.
+ -a, --access          Watch file accesses.
+ -d, --directories     Watch directories only.
+ -e, --exclude=REGEX   Exclude paths matching REGEX.
+ -E, --extended        Use extended regular expressions.
+ -i, --include=REGEX   Include paths matching REGEX.
+ -I, --insensitive     Use case insensitive regular expressions.
+ -L, --follow-links    Follow symbolic links.
+ -r, --recursive       Recurse subdirectories.
+EOF
+}
+
+fswatch_args=()
+while [ $# -gt 0 ]; do
+	if [ "$1" = '--' ]; then
+		break
+	elif [[ "$1" = '-h' || "$1" = '--help' ]]; then
+		usage
+		exit 0
+	fi
+	fswatch_args+=("$1")
+	shift 1
+done
+
+if [ $# -eq 0 ]; then
+	usage
+	exit 1
+fi
+
+if [ ${#fswatch_args[@]} -le 0 ]; then
+	echo 'no arguments given for fswatch' >&2
+	exit 1
+fi
+
+# Shift away the --
+if ! shift 1 || [ $# -le 0 ]; then
+	echo 'no command to run given' >&2
+	exit 1
+fi
+
+fswatch -o "${fswatch_args[@]}" | xargs -n1 -I{} -- "$@"
