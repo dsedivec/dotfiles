@@ -1,5 +1,0 @@
---pager=less
---smart-case
---type-set=coffee=.coffee
---type-set=conf=.conf,.ini
---type-add=html:ext:html.translate
