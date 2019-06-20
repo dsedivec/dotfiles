@@ -552,6 +552,11 @@ if [ -r ~/.rbenv/bin/rbenv ]; then
 fi
 
 ######################################################################
+### .NET Core (oh god I'm so sorry)
+
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+######################################################################
 ### Aids for changing directories
 
 # This is all below RVM, which modifies the cd command.
