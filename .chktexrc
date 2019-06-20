@@ -1,4 +1,4 @@
-QuoteStyle = Traditional
+QuoteStyle = Logical
 
 # Don't warn about space before \label.
 # https://tex.stackexchange.com/q/264109
