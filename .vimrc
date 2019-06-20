@@ -90,4 +90,10 @@ au FileType python setlocal et sw=4 ts=4 ai si sm
 " http://vim.wikia.com/wiki/Editing_crontab
 au BufEnter /private/tmp/crontab.* setlocal backupcopy=yes
 
+" gopass editing without temp files
+" Pattern based on actions/edit.go and utils/tempfile/file.go.
+" autocmd suggested by docs/setup.md.
+" Additional random settings from https://vi.stackexchange.com/q/6177
+au BufNewFile,BufRead */gopass-edit*/secret setlocal noswapfile nobackup noundofile noshelltemp nowritebackup
+
 let c_space_errors=1
