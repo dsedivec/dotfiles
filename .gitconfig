@@ -60,7 +60,7 @@
 	mm = merge master
 	mom = merge origin/master
 	mff = merge --ff-only
-	mc = merge --no-ff
+	mc = merge --no-ff --no-edit
 	mp = !p=$(git parent-branch) && git merge "$p"
 	mop = !p=$(git parent-branch) && git merge origin/"$p"
 
