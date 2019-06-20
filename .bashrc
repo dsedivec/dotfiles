@@ -600,6 +600,56 @@ cd () {
 
 unset real_cd
 
+######################################################################
+### fzf
+
+fzf_bindings=/opt/local/share/fzf/shell/key-bindings.bash
+if [ -f "$fzf_bindings" ]; then
+	source "$fzf_bindings"
+
+	# Put back my C-t, move FZF to M-i instead.  Emacs user checking in.
+	bind '"\C-t": transpose-chars'
+	# (This actually breaks in Bash < v4.)
+	bind -x '"\ei": "fzf-file-widget"'
+
+	FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} --bind alt-p:toggle-preview"
+	FZF_CTRL_R_OPTS="${FZF_CTRL_R_OPTS:-} --preview='echo {}' --preview-window=up:3:wrap"
+
+	if command -v fd >/dev/null; then
+		# fd is much faster than find.
+		FZF_DEFAULT_COMMAND='fd -HI --type file --color=always'
+		FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --ansi"
+		FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+	fi
+
+	# Complete all commands?  I don't know why this isn't the default
+	# for Bash.  Thinking complete -D might be too new?  Or else this
+	# is going to break horribly in ways I can't predict.
+	complete -D -F _fzf_path_completion -o default -o bashdefault
+
+	# Hack fzf into Git's completion for branches.  May not work
+	# everywhere.  Probably also breaks the ** trigger on Git
+	# commands; use M-i (see above).
+
+	_completion_loader git
+
+	eval __orig"$(declare -f __gitcomp_direct)"
+
+	__gitcomp_direct ()
+	{
+		# Fun fact: Bash (at least my current version here from
+		# MacPorts) seems to remove duplicates from COMPREPLY.  fzf
+		# doesn't.
+		if [[ -z "$1" ]] \
+			|| ! FZF_COMPLETION_TRIGGER='' _fzf_complete '' '' < <(
+				   echo "$1" | sort -u )
+		then
+			__orig__gitcomp_direct "$@"
+		fi
+	}
+fi
+unset fzf_bindings
+
 
 ######################################################################
 ### Other cute commands
