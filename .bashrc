@@ -107,8 +107,10 @@ if command -v ruby >/dev/null; then
 fi
 # npm packages installed in my home directory.
 PATH=$HOME/.npm-packages/bin:$PATH
-# Cabal (Haskell; I like ShellCheck)
-PATH=$HOME/.cabal/bin:$PATH
+# Haskell Stack, for ShellCheck and also for development.  Though I
+# think this is some definition of a "standard user's binary
+# directory", not Stack- or Haskell-specific.
+PATH=$HOME/.local/bin:$PATH
 # Finally, ~/bin always goes first.
 PATH=$HOME/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
