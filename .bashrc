@@ -377,6 +377,7 @@ fi
 
 export YDIFF_OPTIONS='-t 4 --wrap'
 
+
 ######################################################################
 ### SSH agent forwarding under a long running screen
 
@@ -522,6 +523,7 @@ workon() {
 	. "$activate"
 }
 
+
 ######################################################################
 ### Node.js/npm
 
@@ -537,12 +539,14 @@ if [ -d "$npm_man_dir" ]; then
 fi
 unset npm_man_dir
 
+
 ######################################################################
 ### RVM
 
 if [ -s "$HOME/.rvm/scripts/rvm" ]; then
 	. "$HOME/.rvm/scripts/rvm"
 fi
+
 
 ######################################################################
 ### rbenv
@@ -551,10 +555,12 @@ if [ -r ~/.rbenv/bin/rbenv ]; then
 	eval "$(rbenv init -)"
 fi
 
+
 ######################################################################
 ### .NET Core (oh god I'm so sorry)
 
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
+
 
 ######################################################################
 ### gopass completion
@@ -562,6 +568,7 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 if command -v gopass >/dev/null; then
 	source <(gopass completion bash)
 fi
+
 
 ######################################################################
 ### Aids for changing directories
@@ -599,6 +606,7 @@ cd () {
 '
 
 unset real_cd
+
 
 ######################################################################
 ### fzf
