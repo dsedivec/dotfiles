@@ -28,6 +28,11 @@
 	co = checkout
 	wdiff = diff --word-diff
 	conflicts = diff --name-only --diff-filter=U --relative
+	# Nice output for scripts.
+	ls-branches = for-each-ref --format='%(refname:lstrip=2)' refs/heads/*
+	fzf-rm-branches = !git ls-branches \
+		| fzf -m --preview='git log -10 --no-merges {}' \
+		| git branch -D
 
 	# Verbs:
 	# p = pull
