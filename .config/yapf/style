@@ -1,0 +1,20 @@
+;;; -*- mode: conf; -*-
+
+[style]
+based_on_style = pep8
+
+allow_multiline_dictionary_keys = true
+coalesce_brackets = true
+; disable_ending_comma_heuristic = false
+indent_dictionary_value = true
+space_between_ending_comma_and_closing_bracket = false
+spaces_around_default_or_named_assign = false
+;; This option requires yapf > 0.27.0
+split_all_top_level_comma_separated_values = true
+split_before_arithmetic_operator = true
+split_before_bitwise_operator = true
+split_before_closing_bracket = true
+split_before_dot = true
+split_complex_comprehension = true
+;; Not sure if we want this.
+;;split_penalty_logical_operator = 0
