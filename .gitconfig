@@ -118,3 +118,5 @@
 	markEmptyLines = false
 [magit]
 	hideCampaign = true
+[log]
+	decorate = no
