@@ -325,50 +325,24 @@ fi
 VISUAL="$EDITOR"
 export VISUAL EDITOR
 
-# I wish there was such thing as ~/.agrc.
-alias ag="ag --pager=less --smart-case"
+REAL_RIPGREP=$(type -P rg)
+if [ $? -eq 0 ]; then
+	rg() {
+		if [[ -t 0 && -t 1 ]]; then
+			"$REAL_RIPGREP" -p "$@" | "${PAGER:-less}"
+		else
+			"$REAL_RIPGREP" "$@"
+		fi
+	}
 
-# Open ag results in Vim or Emacs.  Vim requires ag.vim from
-# https://github.com/rking/ag.vim, Emacs requires ag.el from
-# https://github.com/Wilfred/ag.el as well as (my:focus-emacs) from
-# https://github.com/dsedivec/dot-emacs-d/blob/master/lisp/my/general-config.el.
-vag() {
-	local -a quoted_args=()
-	for arg in "$@"; do
-		quoted_args+=("$(printf %q "$arg")")
-	done
-	vim -c ":Ag! ${quoted_args[*]}" -c ":only"
-}
+	ag() {
+		echo "use rg, ag has broken .gitignore support" >&2
+		return 1
+	}
+fi
 
-eag() {
-	local quoted_arg quoted_pwd
-	local -a quoted_args=()
-	for arg in "$@"; do
-		quoted_arg=$(printf %q "$arg")
-		# Great, you've quoted for the shell.  Now quote for Emacs.
-		quoted_arg=${quoted_arg//\\/\\\\}
-		quoted_arg=${quoted_arg//\"/\\\"}
-		quoted_args+=("$quoted_arg")
-	done
-	quoted_pwd=$(printf %q "$PWD")
-	quoted_pwd=${quoted_pwd//\\/\\\\}
-	quoted_pwd=${quoted_pwd//\"/\\\"}
-	emacsclient --eval "
-		(progn
-		  (compilation-start \"cd $quoted_pwd; ag --smart-case --color --color-match '30;43' --column --nogroup ${quoted_args[*]}\" 'ag-mode)
-		  (pop-to-buffer \"*ag*\")
-		  (my:focus-emacs))
-	"
-}
-
-# Man, ripgrep doesn't even have --pager.
-rg() {
-	if [ -t 1 ]; then
-		command rg --smart-case -p "$@" | "${PAGER:-less}"
-	else
-		command rg --smart-case "$@"
-	fi
-}
+RIPGREP_CONFIG_PATH=$HOME/.rgrc
+export RIPGREP_CONFIG_PATH
 
 ######################################################################
 ### SSH agent forwarding under a long running screen
