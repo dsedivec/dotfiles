@@ -10,7 +10,6 @@ call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-sensible'
 Plug 'scrooloose/nerdcommenter'
 Plug 'Lokaltog/vim-easymotion'
-Plug 'mileszs/ack.vim'
 " Lets you kill a buffer without killing its window.
 " Try :BW (instead of :bw)
 " Possible alternative: https://github.com/moll/vim-bbye
