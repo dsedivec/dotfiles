@@ -639,9 +639,9 @@ if [[ -n "$PS1" && -f "$fzf_bindings" ]]; then
 		FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 	fi
 
-	# Complete all commands?  I don't know why this isn't the default
-	# for Bash.  Thinking complete -D might be too new?  Or else this
-	# is going to break horribly in ways I can't predict.
+	# Complete all commands with "**"?  I don't know why this isn't
+	# the default for Bash.  Thinking complete -D might be too new?
+	# Or else this is going to break horribly in ways I can't predict.
 	complete -D -F _fzf_path_completion -o default -o bashdefault
 
 	# Hack fzf into Git's completion for branches.  May not work
