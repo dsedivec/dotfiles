@@ -85,6 +85,8 @@ au FileType sh setlocal ts=4 sw=4
 
 au FileType python setlocal et sw=4 ts=4 ai si sm
 
+au FileType yaml setlocal et sw=2
+
 " Fix for editing crontab with vim under OS X.
 " http://vim.wikia.com/wiki/Editing_crontab
 au BufEnter /private/tmp/crontab.* setlocal backupcopy=yes
