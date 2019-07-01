@@ -612,7 +612,16 @@ unset real_cd
 ### fzf
 
 fzf_bindings=/opt/local/share/fzf/shell/key-bindings.bash
-if [ -f "$fzf_bindings" ]; then
+if [[ -n "$PS1" && -f "$fzf_bindings" ]]; then
+	# MacPorts drops fzf's Bash completion setup into the
+	# bash-completion load-on-demand directory, but I don't think
+	# that's right: when installed this way I think the script never
+	# gets executed unless/until you actually try to run "fzf ...", at
+	# which point the completion script gets loaded.
+	#
+	# Instead, load it right now.
+	_completion_loader fzf
+
 	source "$fzf_bindings"
 
 	# Put back my C-t, move FZF to M-i instead.  Emacs user checking in.
