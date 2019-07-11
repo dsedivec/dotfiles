@@ -92,3 +92,5 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 	return delete_event
 end)
 tap:start()
+
+hs.loadSpoon("ControlEscape"):start()
