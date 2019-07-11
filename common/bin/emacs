@@ -2,6 +2,18 @@
 
 set -euo pipefail
 
+if [[ -n "${EMACS:-}" && "$EMACS" != "emacs" ]]; then
+	emacs_binary=$EMACS
+elif [[ "$(uname -s)" == Darwin ]]; then
+	emacs_binary=$HOME/Applications/Emacs.app/Contents/MacOS/Emacs
+else
+	emacs_binary=/usr/bin/emacs
+fi
+if [[ ! -x "$emacs_binary" ]]; then
+	echo "can't find Emacs at $emacs_binary" >&2
+	exit 1
+fi
+
 for arg in "$@"; do
 	if [[ "$arg" == -- ]]; then
 		break
@@ -9,22 +21,11 @@ for arg in "$@"; do
 		# You passed some switch, just run the Emacs binary, not
 		# emacsclient.  Note we can't just run "emacs" because that's
 		# what this script is named.
-		if [[ -n "${EMACS:-}" && "$EMACS" != "emacs" ]]; then
-			emacs_binary=$EMACS
-		elif [[ "$(uname -s)" == Darwin ]]; then
-			emacs_binary=$HOME/Applications/Emacs.app/Contents/MacOS/Emacs
-		else
-			emacs_binary=/usr/bin/emacs
-		fi
-		if [[ ! -x "$emacs_binary" ]]; then
-			echo "can't find Emacs at $emacs_binary" >&2
-			exit 1
-		fi
 		exec "$emacs_binary" "$@"
 	fi
 done
 
-exec emacsclient --no-wait "$@"
+exec emacsclient --no-wait -a "$emacs_binary" "$@"
 
 echo 'Cannot get here!' >&2
 exit 1

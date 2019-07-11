@@ -93,4 +93,11 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 end)
 tap:start()
 
+-- package.path = package.path:gsub('/usr/local/share/lua/5.3',
+--                                  '/opt/local/share/lua/5.3')
+-- require 'luarocks.loader'
+-- fennel = require 'fennel'
+-- table.insert(package.loaders or package.searchers, fennel.searcher)
+-- require 'moom'
+
 hs.loadSpoon("ControlEscape"):start()
