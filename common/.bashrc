@@ -86,6 +86,8 @@ fi
 #
 # MacPorts
 PATH=/opt/local/bin:/opt/local/sbin:$PATH
+# Homebrew, in my special location
+PATH=$HOME/.brew/bin:$PATH
 # Local directories, for OpenBSD ports and SSC /usr/local/bin/python.
 PATH=/usr/local/bin:/usr/local/sbin:$PATH
 # SSC PostgreSQL install.
