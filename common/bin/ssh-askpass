@@ -1,0 +1,58 @@
+#!/usr/bin/python
+# -*- coding: utf-8; -*-
+
+import argparse
+import subprocess
+import sys
+import urllib
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(prog=argv[0])
+    parser.add_argument(
+        "--pinentry",
+        "-p",
+        help="Path to pinentry",
+        default=(
+            "/usr/local/MacGPG2/libexec/pinentry-mac.app"
+            "/Contents/MacOS/pinentry-mac"
+        ),
+    )
+    parser.add_argument(
+        "prompt", nargs="?", default="Enter your OpenSSH passphrase:"
+    )
+    args = parser.parse_args(argv[1:])
+    pinentry = subprocess.Popen(
+        [args.pinentry], stdin=subprocess.PIPE, stdout=subprocess.PIPE
+    )
+    cmds = [
+        "SETDESC %s" % (urllib.quote(args.prompt),),
+        "SETTITLE ssh-askpass",
+        "CONFIRM" if args.prompt.endswith("?") else "GETPIN",
+        "BYE",
+    ]
+    stdout = pinentry.communicate("\n".join(cmds))[0]
+    exit_status = 0
+    passphrase = None
+    for line in stdout.splitlines():
+        if line.startswith("ERR"):
+            exit_status = -1
+            # Don't print an error when the user hits cancel, which is
+            # ASSUAN_Canceled or 99 | (5 << 24).  See assuan.h in GPG
+            # sources.  (Man page says it should be
+            # ASSUAN_Not_Confirmed → 114 when using CONFIRM, but that
+            # isn't how my pinentry is behaving.)
+            if not line.startswith("ERR 83886179 "):
+                sys.stderr.write("pinentry error: %s\n" % (line,))
+        elif line.startswith("D "):
+            passphrase = urllib.unquote(line[2:])
+        elif not (line == "OK" or line.startswith("OK ")):
+            exit_status = -1
+            sys.stderr.write("unknown pinentry response: %s\n" % (line,))
+    if exit_status == 0 and passphrase:
+        sys.stdout.write(passphrase + "\n")
+    return exit_status
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

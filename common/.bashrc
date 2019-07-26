@@ -383,6 +383,17 @@ fi
 
 export YDIFF_OPTIONS='-t 4 --wrap'
 
+# Poor macOS users have no ssh-askpass.  I hacked one up in Python.
+# Use it if SSH_ASKPASS isn't set and if the binary is present.
+if [ -z "$SSH_ASKPASS" ] && [ "$(uname -s)" = 'Darwin' ]; then
+	SSH_ASKPASS=$HOME/bin/ssh-askpass
+	if [ -x "$SSH_ASKPASS" ]; then
+		export SSH_ASKPASS
+	else
+		unset SSH_ASKPASS
+	fi
+fi
+
 
 ######################################################################
 ### SSH agent forwarding under a long running screen
