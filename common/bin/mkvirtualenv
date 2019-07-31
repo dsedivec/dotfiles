@@ -47,10 +47,11 @@ def main():
     python_args.add_argument("--python", "-p", default=sys.executable)
     python_args.add_argument("--python-version", "-V")
     parser.add_argument(
-        "--root-dir", "-r", "-d", default=workon_home, required=not workon_home
+        "--root-dir", "-d", default=workon_home, required=not workon_home
     )
     parser.add_argument("--virtualenv-script", "--vs")
     parser.add_argument("--force", "-f", default=False, action="store_true")
+    parser.add_argument("--requirements", "-r")
     parser.add_argument("env_name")
     args = parser.parse_args()
     if args.python_version:
@@ -71,8 +72,15 @@ def main():
         )
     command = [python_exe, virtualenv_script, "--distribute", virtualenv_path]
     print("executing: %s" % (" ".join(command),))
-    os.execvp(command[0], command)
-    raise Exception("should never get here")
+    subprocess.check_call(command)
+    command = [
+        os.path.join(virtualenv_path, "bin", "pip"),
+        "install",
+        "-r",
+        args.requirements,
+    ]
+    print("executing: %s" % (" ".join(command),))
+    subprocess.check_call(command)
 
 
 if __name__ == "__main__":
