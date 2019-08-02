@@ -73,14 +73,15 @@ def main():
     command = [python_exe, virtualenv_script, "--distribute", virtualenv_path]
     print("executing: %s" % (" ".join(command),))
     subprocess.check_call(command)
-    command = [
-        os.path.join(virtualenv_path, "bin", "pip"),
-        "install",
-        "-r",
-        args.requirements,
-    ]
-    print("executing: %s" % (" ".join(command),))
-    subprocess.check_call(command)
+    if args.requirements:
+        command = [
+            os.path.join(virtualenv_path, "bin", "pip"),
+            "install",
+            "-r",
+            args.requirements,
+        ]
+        print("executing: %s" % (" ".join(command),))
+        subprocess.check_call(command)
 
 
 if __name__ == "__main__":
