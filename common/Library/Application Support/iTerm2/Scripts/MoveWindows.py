@@ -20,7 +20,6 @@ async def stack_windows_down(
                 frame.origin.x = x
             frame.origin.y = last_y - frame.size.height
             await window.async_set_frame(frame)
-            print(frame.origin)
             last_y = frame.origin.y
         else:
             last_y = last_y - default_height
@@ -50,7 +49,6 @@ async def main(connection):
         default_height = min(
             default_height or frame.size.height, frame.size.height
         )
-    print("def WxH", default_width, default_height)
 
     # Let's do stupid stunts to find the screen dimensions.  This is
     # fucking stupid.  This will all break with >1 monitor.  In that
@@ -79,8 +77,6 @@ async def main(connection):
     await a_window.async_set_frame(frame)
     frame = await a_window.async_get_frame()
     max_x = frame.origin.x + min_x_visible
-    print("duck1", frame.origin.x, min_x_visible)
-    print("max x,y", max_x, max_y)
 
     await stack_windows_down(first_eight_windows[:3], 0, max_y, default_height)
     await stack_windows_down(
