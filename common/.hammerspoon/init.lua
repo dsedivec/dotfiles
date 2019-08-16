@@ -57,7 +57,9 @@ end)
 
 hs.hotkey.bind('alt-ctrl', '`', hs.toggleConsole)
 
+PLAYER_EVENTS = {PLAY = true; FAST = true; REWIND = true}
 MPD_COMMANDS = {PLAY = "toggle"; FAST = "next"; REWIND = "prev"}
+VLC_COMMANDS = {PLAY = "play"; FAST = "next"; REWIND = "previous"}
 AIRFOIL_EVENTS = {SOUND_UP = "+", SOUND_DOWN = "-"}
 DEBUG_TAP = false
 tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
@@ -71,10 +73,18 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 	local delete_event = false
 	if not sys_key_event or not sys_key_event.down then
 		return false
-	elseif MPD_COMMANDS[sys_key_event.key] and not sys_key_event['repeat']
+	elseif PLAYER_EVENTS[sys_key_event.key] and not sys_key_event['repeat']
 	then
-		print("received media event, calling as-mpc")
+		print("received media event")
 		hs.execute("~/bin/as-mpc " .. MPD_COMMANDS[sys_key_event.key])
+		script = string.format([[
+			if application "VLC" is running then
+			  tell application "VLC"
+                if current time >= 0 then %s
+			  end tell
+			end if
+		]], VLC_COMMANDS[sys_key_event.key])
+		hs.osascript.applescript(script)
 	elseif AIRFOIL_EVENTS[sys_key_event.key] and event:getFlags().ctrl then
 		script = string.format([[
 			if application "Airfoil" is running then
