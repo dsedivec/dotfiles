@@ -1,0 +1,38 @@
+#!/usr/bin/python
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
+
+import argparse
+import os.path
+import sys
+
+import AppKit
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(prog=os.path.basename(argv[0]))
+    parser.add_argument("operation", choices=("types", "get"))
+    parser.add_argument("--type", "-t", default="public.utf8-plain-text")
+    args = parser.parse_args(argv[1:])
+    pasteboard = AppKit.NSPasteboard.generalPasteboard()
+    pb_items = pasteboard.pasteboardItems()
+    if len(pb_items) <= 0:
+        raise Exception("General pasteboard is empty")
+    pb_item = pb_items[0]
+    if args.operation == "types":
+        for uti in pb_item.types():
+            print(uti)
+    elif args.operation == "get":
+        value = pb_item.stringForType_(args.type)
+        if value is not None:
+            print(value)
+    else:
+        raise Exception("should never get here")
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv) or 0)
