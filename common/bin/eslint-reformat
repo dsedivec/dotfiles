@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# jq -e causes jq to exit non-zero if it doesn't produce output.
+eslint --fix-dry-run --stdin --format=json | jq -er '.[0].output'
