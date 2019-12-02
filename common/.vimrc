@@ -55,6 +55,9 @@ set laststatus=2   " Always show the statusline
 set encoding=utf-8 " Necessary to show Unicode glyphs
 set t_Co=256 " Explicitly tell Vim that the terminal supports 256 colors
 
+Plug 'majutsushi/tagbar'
+nmap <F8> :TagbarToggle<CR>
+
 call plug#end()
 " Note that vim-plug does "filetype plug indent on" and "syntax enable".
 
