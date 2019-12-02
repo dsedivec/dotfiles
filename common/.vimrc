@@ -36,6 +36,7 @@ Plug 'tpope/vim-surround'
 " too slow, perhaps.
 " https://github.com/ctrlpvim/ctrlp.vim
 Plug 'ctrlpvim/ctrlp.vim'
+let g:ctrlp_extensions = ['buffertag']
 " Syntax checking for lots of languages.
 " https://github.com/scrooloose/syntastic
 Plug 'scrooloose/syntastic'
