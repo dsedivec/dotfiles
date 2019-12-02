@@ -34,8 +34,8 @@ endif
 Plug 'tpope/vim-surround'
 " Find files.  Pure Vim alternative to Command-T, but try Command-T if this is
 " too slow, perhaps.
-" https://github.com/kien/ctrlp.vim
-Plug 'kien/ctrlp.vim'
+" https://github.com/ctrlpvim/ctrlp.vim
+Plug 'ctrlpvim/ctrlp.vim'
 " Syntax checking for lots of languages.
 " https://github.com/scrooloose/syntastic
 Plug 'scrooloose/syntastic'
