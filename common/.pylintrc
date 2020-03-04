@@ -2,6 +2,9 @@
 
 # Run "pylint --generate-rcfile | less" to see all options.
 
+[MASTER]
+extension-pkg-whitelist = lxml, lxml.etree
+
 [BASIC]
 include-naming-hint = yes
 
