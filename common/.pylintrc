@@ -21,9 +21,13 @@ method-rgx = (([a-z_][a-z0-9_]{2,50})|(_[a-z0-9_]*)|(__[a-z][a-z0-9_]+__))$
 [MESSAGES CONTROL]
 # bad-continuation is badly broken, see
 # https://github.com/PyCQA/pylint/issues/289.
-disable=missing-docstring,
-        line-too-long,
-        bad-continuation,
-        too-many-locals,
-        too-few-public-methods,
-        too-many-instance-attributes
+disable =
+    bad-continuation,
+    global-statement,
+    line-too-long,
+    missing-docstring,
+    no-else-return,
+    protected-access,
+    too-few-public-methods,
+    too-many-locals,
+    too-many-instance-attributes,
