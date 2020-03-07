@@ -55,6 +55,10 @@ set laststatus=2   " Always show the statusline
 set encoding=utf-8 " Necessary to show Unicode glyphs
 set t_Co=256 " Explicitly tell Vim that the terminal supports 256 colors
 
+"Plug 'wincent/command-t', {
+"\   'do': 'cd ruby/command-t/ext/command-t && ruby extconf.rb && make'
+"\ }
+
 Plug 'majutsushi/tagbar'
 nmap <F8> :TagbarToggle<CR>
 
