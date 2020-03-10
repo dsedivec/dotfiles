@@ -182,22 +182,24 @@ vipath() {
 ######################################################################
 ### General settings
 
-# Copied from FC5 /etc/bashrc.
-# are we an interactive shell?
+# Bash manual documents testing PS1 as a valid way to know if you're
+# in an interactive shell.
 if [ "$PS1" ]; then
-	case $TERM in
-		xterm*)
-			PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/~}"; echo -ne "\007"'
-			;;
-
-		screen)
-			PROMPT_COMMAND='echo -ne "\033_${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/~}"; echo -ne "\033\\"'
-			;;
-	esac
+	# Apparently Bash 4.3 started expanding REPL in ${PARM/PAT/REPL}
+	# expressions ("setopt -s compat42").  Thanks to #bash for this
+	# workaround.
+	_A_TILDE=\~
+	_prompt_command() {
+		# Terminating with BEL rather than ESC \.  The latter is
+		# proper standard, the former is supported by more
+		# (particularly GNU Screen).
+		printf '\033]0;%s@%s:%s\007' \
+			   "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/$_A_TILDE}"
+	}
+	PROMPT_COMMAND=_prompt_command
 	PS1='[\u@\h \W]\$ '
 	export PS1
 fi
-
 
 HISTFILESIZE=1000000
 HISTSIZE=1000000
