@@ -4,14 +4,11 @@
 export MPD_HOST=localhost
 export PATH=/opt/local/bin:$PATH
 
-status=$(mpc status | sed -e 's/^\[\([a-z]*\)].*/\1/g; t' -e 'd')
-[ $? -eq 0 ] || exit 1
-# If status is blank then we're not playing or paused, so don't do
-# anything.
-if [ -n "$status" ]; then
-	exec mpc --no-status "$@"
-	echo "should never get here" >&2
-	exit 1
-fi
-
-exit 0
+# "mpc current" will print the current track if mpd is playing or
+# paused, or it will print nothing if mpd is stopped.
+current=$(mpc current)
+[ $? -eq 0 ] || exit 128
+[ -n "$current" ] || exit 1
+exec mpc -q "$@"
+echo "should never get here" >&2
+exit 129

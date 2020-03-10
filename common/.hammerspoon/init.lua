@@ -76,15 +76,31 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 	elseif PLAYER_EVENTS[sys_key_event.key] and not sys_key_event['repeat']
 	then
 		print("received media event")
-		hs.execute("~/bin/as-mpc " .. MPD_COMMANDS[sys_key_event.key])
+		output, status, type, rc = hs.execute(
+			"~/bin/as-mpc " .. MPD_COMMANDS[sys_key_event.key]
+		)
+		if status and rc == 0 then
+			delete_event = true
+		end
+		-- This always launches VLC the first time you run this after
+		-- Hammerspoon restarts.  See
+		-- https://stackoverflow.com/a/16071855/2305480 for possible
+		-- solutions.  Too lazy today.
 		script = string.format([[
 			if application "VLC" is running then
 			  tell application "VLC"
-                if current time >= 0 then %s
+                if current time >= 0 then
+                  %s
+                  return true
+                end if
 			  end tell
 			end if
+            return false
 		]], VLC_COMMANDS[sys_key_event.key])
-		hs.osascript.applescript(script)
+		success, sent_command = hs.osascript.applescript(script)
+		if success and sent_command then
+			delete_event = true
+		end
 	elseif AIRFOIL_EVENTS[sys_key_event.key] and event:getFlags().ctrl then
 		script = string.format([[
 			if application "Airfoil" is running then
