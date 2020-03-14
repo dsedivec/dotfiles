@@ -7,7 +7,7 @@ $pdf_mode = 1;
 
 # Don't stop on errors and use lualatex because it's exciting (and
 # needed for things such as fontspec).
-$pdflatex = "lualatex -interaction=nonstopmode %O %S";
+$pdflatex = "lualatex -interaction=nonstopmode -halt-on-error %O %S";
 
 # Taken from http://tex.stackexchange.com/a/44316/1680
 add_cus_dep('glo', 'gls', 0, 'run_makeglossaries');
