@@ -78,6 +78,15 @@ set hidden
 set printoptions=paper:letter
 set mouse=a
 
+" Make bracketed paste work on tmux within iTerm.  Really this just enables it
+" for anything that vaguely looks like "screen".  Good luck.
+if &term =~ "screen"
+	let &t_BE = "\e[?2004h"
+	let &t_BD = "\e[?2004l"
+	exec "set t_PS=\e[200~"
+	exec "set t_PE=\e[201~"
+endif
+
 " Mail settings
 aug new_mail
 au User all set textwidth=70 noet ts=8 syntax=mail spell
