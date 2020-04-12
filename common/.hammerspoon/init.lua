@@ -76,7 +76,7 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 	elseif PLAYER_EVENTS[sys_key_event.key] and not sys_key_event['repeat']
 	then
 		print("received media event")
-		output, status, type, rc = hs.execute(
+		local _output, status, _type, rc = hs.execute(
 			"~/bin/as-mpc " .. MPD_COMMANDS[sys_key_event.key]
 		)
 		if status and rc == 0 then
@@ -86,7 +86,7 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 		-- Hammerspoon restarts.  See
 		-- https://stackoverflow.com/a/16071855/2305480 for possible
 		-- solutions.  Too lazy today.
-		script = string.format([[
+		local script = string.format([[
 			if application "VLC" is running then
 			  tell application "VLC"
                 if current time >= 0 then
@@ -97,12 +97,12 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 			end if
             return false
 		]], VLC_COMMANDS[sys_key_event.key])
-		success, sent_command = hs.osascript.applescript(script)
+		local success, sent_command = hs.osascript.applescript(script)
 		if success and sent_command then
 			delete_event = true
 		end
 	elseif AIRFOIL_EVENTS[sys_key_event.key] and event:getFlags().ctrl then
-		script = string.format([[
+		local script = string.format([[
 			if application "Airfoil" is running then
 			  tell application "Airfoil"
 			    set activeSpeakers to every speaker whose connected is true
