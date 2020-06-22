@@ -1,4 +1,4 @@
-personal_ws-1.1 en 163 
+personal_ws-1.1 en 165 
 ACMF
 API
 AWS
@@ -96,6 +96,7 @@ customizable
 customizations
 decrement
 deinstitutionalisation
+deleteable
 deliverables
 documenter
 enqueued
@@ -156,6 +157,7 @@ underperforming
 underserved
 unlinks
 unsurprised
+updatable
 verifiably
 viewports
 virtualization
