@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import sys
-import subprocess as subp
 import os
 import re
+import subprocess as subp
+import sys
+
 
 def main(argv=None):
     if argv is None:
@@ -11,9 +12,12 @@ def main(argv=None):
     push_args = argv[1:]
     dry_run_cmd = ["git", "push", "--dry-run", "--porcelain"]
     dry_run_cmd.extend(push_args)
-    dry_run = subp.Popen(dry_run_cmd, stdout=subp.PIPE)
-    ref_statuses = [line for line in dry_run.communicate()[0].split("\n")
-                    if re.search(r"^[ +*]\t", line)]
+    dry_run = subp.Popen(dry_run_cmd, stdout=subp.PIPE, universal_newlines=True)
+    ref_statuses = [
+        line
+        for line in dry_run.communicate()[0].split("\n")
+        if re.search(r"^[ +*]\t", line)
+    ]
     if dry_run.returncode != 0:
         raise Exception("git push --dry-run exited %d" % (dry_run.returncode,))
     for status_line in ref_statuses:
@@ -21,20 +25,24 @@ def main(argv=None):
         if not re.search(r"^[0-9a-f]+\.\.\.?[0-9a-f]+$", summary):
             raise Exception("don't know how to handle %r" % (status_line,))
         git_log_cmd = ("git log --oneline " + summary).split()
-        git_log = subp.Popen(git_log_cmd, stdout=subp.PIPE)
+        git_log = subp.Popen(
+            git_log_cmd, stdout=subp.PIPE, universal_newlines=True
+        )
         for first_line in git_log.communicate()[0].strip().split("\n"):
             commit_id, message = first_line.split(None, 1)
             # Catching !foo or foo! (e.g. squash! or fixup!, supported
             # by git-rebase).
             if re.search(r"^\s*(?:!|\w+!)", message):
-                raise Exception("commit %s should not be pushed: %r" %
-                                (commit_id, message))
+                raise Exception(
+                    "commit %s should not be pushed: %r" % (commit_id, message)
+                )
         if git_log.returncode != 0:
             raise Exception("%r failed" % (" ".join(git_log_cmd),))
     git_push_cmd = ["git", "push"]
     git_push_cmd.extend(push_args)
     os.execvp("git", git_push_cmd)
     raise Exception("should never get here")
+
 
 if __name__ == "__main__":
     main()
