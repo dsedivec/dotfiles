@@ -652,7 +652,8 @@ unset real_cd
 ### fzf
 
 fzf_bindings=/opt/local/share/fzf/shell/key-bindings.bash
-if [[ -n "$PS1" && -f "$fzf_bindings" ]]; then
+if [[ -n "$PS1" && -f "$fzf_bindings" ]] && type _completion_loader &>/dev/null
+then
 	# MacPorts drops fzf's Bash completion setup into the
 	# bash-completion load-on-demand directory, but I don't think
 	# that's right: when installed this way I think the script never
