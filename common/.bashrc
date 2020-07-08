@@ -182,6 +182,27 @@ vipath() {
 ######################################################################
 ### General settings
 
+# macOS Catalina stopped putting a blank entry in MANPATH somehow, so
+# I stopped getting all the system man pages from the developer tools.
+# Check for this and put it back in if necessary.
+found_blank_MANPATH=0
+saved_IFS=$IFS
+IFS=:
+set -f
+for dir in ${MANPATH:-}; do
+	if [ -z "$dir" ]; then
+		found_blank_MANPATH=1
+		break
+	fi
+done
+set +f
+IFS=$saved_IFS
+if [ $found_blank_MANPATH -eq 0 ]; then
+	MANPATH=$MANPATH:
+	export MANPATH
+fi
+unset found_blank_MANPATH
+
 # Bash manual documents testing PS1 as a valid way to know if you're
 # in an interactive shell.
 if [ "$PS1" ]; then
