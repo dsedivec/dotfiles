@@ -114,9 +114,9 @@ PATH=$HOME/.npm-packages/bin:$PATH
 # directory", not Stack- or Haskell-specific.
 PATH=$HOME/.local/bin:$PATH
 # Go
-GOPATH=$HOME/.go
-export GOPATH
-PATH=$GOPATH/bin:$PATH
+if command -v go >/dev/null; then
+	PATH=$(go env GOPATH)/bin:$PATH
+fi
 # Finally, ~/bin always goes first.
 PATH=$HOME/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
