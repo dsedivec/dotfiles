@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+if [[ $# -gt 1 || ($# -eq 1 && $1 != "last") ]]; then
+	echo "bad usage" >&2
+	exit 1
+fi
+
+current_session=$(tmux display -p '#{client_session}') || exit 1
+client_name=$(tmux display -p '#{client_name}' | sed 's/[^A-Za-z0-9_]/_/g') ||
+	exit 1
+
+# 0 if this is the current session and window, 1 otherwise
+fmt="#{||:#{!=:#{session_name},$current_session},#{!=:#{window_active},1}}"
+# Our per-client focus counter, highest number is most recently focused
+fmt="$fmt #{e|+:#{@tmux_fzf_sw_$client_name},0}"
+# Tie breakers
+fmt="$fmt #{session_last_attached} #{window_stack_index}"
+# Session and window ID to switch to
+fmt="$fmt #{session_id}:#{window_id}"
+
+list_and_sort_windows() {
+	tmux list-windows -aF "$fmt" | sort -k 1nr -k 2nr -k 3nr -k 4n
+}
+
+parse_result_and_switch_window() {
+	cut -d' ' -f5 | xargs tmux switch-client -Zt
+}
+
+
+if [[ $# -eq 1 && $1 = "last" ]]; then
+	list_and_sort_windows | head -1 | parse_result_and_switch_window
+else
+	# Display for humans
+	fmt="$fmt #{p15:session_name} #{p3:window_index} #{p40:window_name}"
+	# Add number of panes in the window
+	fmt="$fmt (#{window_panes} pane#{?#{==:#{window_panes},1},,s})"
+
+	# Matching fzf header for the human display bits.
+	header="$(printf '%-15s #   %-40s %s' Session Window Panes)" || exit 1
+
+	list_and_sort_windows |
+		fzf-tmux -p --header "$header"  --layout=reverse --with-nth=6.. \
+		         --bind "alt-w:abort+execute(tmux choose-tree -Zw)" \
+		         --bind "alt-j:jump-accept" |
+		parse_result_and_switch_window
+fi
+
+exit 0
