@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+content=$(cat) || exit 1
+exec osascript - <<EOF
+set the clipboard to {«class HTML»:«data HTML$(hexdump -ve '1/1 "%.2x"' <<< "$content")», «class utf8»:"$(textutil -format html -convert txt -inputencoding utf-8 -encoding utf-8 -stdin -stdout <<< "$content" | sed 's/\(["\\]\)/\\\1/g')"}
+EOF
