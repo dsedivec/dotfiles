@@ -203,25 +203,6 @@ if [ $found_blank_MANPATH -eq 0 ]; then
 fi
 unset found_blank_MANPATH
 
-# Bash manual documents testing PS1 as a valid way to know if you're
-# in an interactive shell.
-if [ "$PS1" ]; then
-	# Apparently Bash 4.3 started expanding REPL in ${PARM/PAT/REPL}
-	# expressions ("setopt -s compat42").  Thanks to #bash for this
-	# workaround.
-	_A_TILDE=\~
-	_prompt_command() {
-		# Terminating with BEL rather than ESC \.  The latter is
-		# proper standard, the former is supported by more
-		# (particularly GNU Screen).
-		printf '\033]0;%s@%s:%s\007' \
-			   "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/$_A_TILDE}"
-	}
-	PROMPT_COMMAND=_prompt_command
-	PS1='[\u@\h \W]\$ '
-	export PS1
-fi
-
 HISTFILESIZE=1000000
 HISTSIZE=1000000
 HISTCONTROL=ignoredups:ignorespace
@@ -746,6 +727,98 @@ vimkill () {
 	rm "$temp_file"
 	return $status
 }
+
+
+######################################################################
+### Fancy prompt
+
+# This comes at/near the bottom to make sure it can put itself first
+# in PROMPT_COMMAND.  Without doing that, we can't see the value of $?.
+
+# Bash manual documents testing PS1 as a valid way to know if you're
+# in an interactive shell.
+if [[ "$PS1" ]]; then
+	_term_sgr() {
+		local fg_bg color
+		while [ $# -gt 0 ]; do
+			case "$1" in
+				reset)
+					tput sgr0
+					shift 1
+					;;
+
+				rgb)
+					[ $# -ge 3 ] || return 1
+					case "$2" in
+						fg) fg_bg=38 ;;
+						bg) fg_bg=48 ;;
+						*) return 1 ;;
+					esac
+					color=${3#\#}
+					printf '\e[%d;2;%d;%d;%dm' $fg_bg \
+						   "0x${color:0:2}" "0x${color:2:2}" "0x${color:4:2}"
+					shift 3
+					;;
+
+				fg|bg)
+					[ $# -ge 2 ] || return 1
+					case "$1" in
+						fg) fg_bg=setaf ;;
+						bg) fg_bg=setab ;;
+					esac
+					case "$2" in
+						black   ) color=0 ;;
+						red     ) color=1 ;;
+						green   ) color=2 ;;
+						yellow  ) color=3 ;;
+						blue    ) color=4 ;;
+						magenta ) color=5 ;;
+						cyan    ) color=6 ;;
+						white   ) color=7 ;;
+						default ) color=9 ;;
+						*) return 1 ;;
+					esac
+					tput $fg_bg $color
+					shift 2;
+					;;
+
+				bold)
+					tput bold
+					shift 1
+					;;
+
+				*)
+					return 1
+					;;
+			esac
+		done
+	}
+
+	_fancy_prompt_green=$(_term_sgr rgb bg 006600 fg white bold)
+	_fancy_prompt_red=$(_term_sgr rgb bg b30000 fg white bold)
+	_fancy_prompt_reset=$(_term_sgr reset)
+
+	# Apparently Bash 4.3 started expanding REPL in ${PARM/PAT/REPL}
+	# expressions ("setopt -s compat42").  Thanks to #bash for this
+	# workaround.
+	_A_TILDE=\~
+	_prompt_command() {
+		if [ $? -eq 0 ]; then
+			_fancy_prompt_color=$_fancy_prompt_green
+		else
+			_fancy_prompt_color=$_fancy_prompt_red
+		fi
+
+		# Terminating with BEL rather than ESC \.  The latter is
+		# proper standard, the former is supported by more
+		# (particularly GNU Screen).
+		printf '\033]0;%s@%s:%s\007' \
+			   "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/$_A_TILDE}"
+	}
+	PROMPT_COMMAND=_prompt_command
+	PS1='${_fancy_prompt_color}☰ \u@\h ${_fancy_prompt_reset} \W \$ '
+fi
+
 
 
 ######################################################################

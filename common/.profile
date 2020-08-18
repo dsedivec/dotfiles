@@ -8,5 +8,3 @@ then
 	eval "`ssh-agent -s`"
 	SSH_AGENT_PPID=$$
 fi
-
-test -e ${HOME}/.iterm2_shell_integration.bash && source ${HOME}/.iterm2_shell_integration.bash
