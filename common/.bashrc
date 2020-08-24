@@ -816,7 +816,7 @@ if [[ "$PS1" ]]; then
 			   "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/$_A_TILDE}"
 	}
 	PROMPT_COMMAND=_prompt_command
-	PS1='${_fancy_prompt_color}☰ \u@\h ${_fancy_prompt_reset} \W \$ '
+	PS1='\[${_fancy_prompt_color}\]☰ \u@\h \[${_fancy_prompt_reset}\] \W \$ '
 fi
 
 
