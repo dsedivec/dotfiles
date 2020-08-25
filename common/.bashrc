@@ -798,6 +798,7 @@ if [[ "$PS1" ]]; then
 	_fancy_prompt_red=$(_term_sgr rgb bg b30000 fg white bold)
 	_fancy_prompt_reset=$(_term_sgr reset)
 
+	_VIRTUAL_ENV_PS1_REGEXP='^\(([^\)]+)\) (.*)(\\[wW].*)$'
 	# Apparently Bash 4.3 started expanding REPL in ${PARM/PAT/REPL}
 	# expressions ("setopt -s compat42").  Thanks to #bash for this
 	# workaround.
@@ -813,7 +814,10 @@ if [[ "$PS1" ]]; then
 		# proper standard, the former is supported by more
 		# (particularly GNU Screen).
 		printf '\033]0;%s@%s:%s\007' \
-			   "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/$_A_TILDE}"
+		       "$USER" "${HOSTNAME%%.*}" "${PWD/#$HOME/$_A_TILDE}"
+		if [[ $PS1 =~ $_VIRTUAL_ENV_PS1_REGEXP && $VIRTUAL_ENV ]]; then
+			PS1="${BASH_REMATCH[2]}(${BASH_REMATCH[1]}) ${BASH_REMATCH[3]}"
+		fi
 	}
 	PROMPT_COMMAND="_prompt_command; $PROMPT_COMMAND"
 	PS1='\[${_fancy_prompt_color}\]☰ \u@\h \[${_fancy_prompt_reset}\] \W \$ '
