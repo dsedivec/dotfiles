@@ -4,7 +4,8 @@ usage() {
 	cat <<EOF
 usage: $(basename "$0") <fswatch arg>... -- <command...>
 
-<command...> may include {} for the file that was changed.
+<command...> may include {} for the file that was changed (UNLESS you
+use --one-per-batch).
 
 Selected fswatch args:
 
@@ -16,6 +17,7 @@ Selected fswatch args:
  -i, --include=REGEX   Include paths matching REGEX.
  -I, --insensitive     Use case insensitive regular expressions.
  -L, --follow-links    Follow symbolic links.
+ -o, --one-per-batch   Print a single message with the number of change events.
  -r, --recursive       Recurse subdirectories.
 EOF
 }
@@ -48,4 +50,4 @@ if ! shift 1 || [ $# -le 0 ]; then
 	exit 1
 fi
 
-fswatch -o "${fswatch_args[@]}" | xargs -n1 -I{} -- "$@"
+fswatch -0 "${fswatch_args[@]}" | xargs -0 -n 1 -I {} -- "$@"
