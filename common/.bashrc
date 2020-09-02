@@ -596,8 +596,15 @@ fi
 
 # This is all below RVM, which modifies the cd command.
 
-# fasd: https://github.com/clvv/fasd
-if which fasd &> /dev/null; then
+# fasd (https://github.com/clvv/fasd) has problems with long argument
+# lists.  Let's try zoxide (https://github.com/ajeetdsouza/zoxide) I
+# guess?  Other possibilities include
+# https://github.com/skywind3000/z.lua and good ol'
+# https://github.com/rupa/z.
+
+if command -v zoxide >/dev/null; then
+	eval "$(zoxide init bash)"
+elif command -v fasd >/dev/null; then
 	eval "$(fasd --init auto)"
 fi
 
