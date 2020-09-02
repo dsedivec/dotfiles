@@ -127,3 +127,62 @@ tap:start()
 -- require 'moom'
 
 hs.loadSpoon("ControlEscape"):start()
+
+-- https://github.com/Hammerspoon/hammerspoon/issues/2386#issuecomment-643715994
+
+function appearanceIsDark()
+	asSuccess, asObj, asDesc = hs.osascript.applescript(
+		"tell application \"System Events\" to tell appearance preferences to return dark mode"
+	)
+	return asObj
+end
+
+function getITerm2Cookie()
+	_, asObj, _ = hs.osascript.applescript(
+		'tell application "iTerm2" to request cookie'
+	)
+	return asObj
+end
+
+-- God damn but I hate Lua.
+function execve_in_background(prog, args, env)
+	local task = hs.task.new(
+		prog,
+		function (rc, out, err)
+			print(prog .. " exited " .. rc)
+			if rc ~= 0 then
+				print("out: " .. out)
+				print("err: " .. err)
+			end
+		end,
+		function (...) return false end,
+		args
+	)
+	if env and next(env) ~= nil then
+		local fullEnv = task:environment()
+		for name, val in pairs(env) do
+			fullEnv[name] = val
+		end
+		task:setEnvironment(fullEnv)
+	end
+	task:start()
+	return task
+end
+
+lastUIAppearance = appearanceIsDark()
+
+hs.distributednotifications.new(
+	function(name, object, userInfo)
+		print("theme change notification running")
+		currentUIAppearance = appearanceIsDark()
+		if currentUIAppearance ~= lastUIAppearance then
+			print("theme changed, running")
+			os.execute(hs.configdir .. "/update_macos_theme.sh")
+		end
+		print("done with theme change")
+		lastUIAppearance = currentUIAppearance
+		print("done with theme change")
+	end,
+	'AppleInterfaceThemeChangedNotification'
+):start()
+print("theme change notification watching")
