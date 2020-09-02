@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+pandoc -s --metadata title= -t html "$@" |
+	textutil -format html -convert rtf -stdin -stdout |
+	sed -e '1 s/Times-Roman/Helvetica/; t' -e '1,// s//Helvetica/'

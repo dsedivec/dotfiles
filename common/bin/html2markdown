@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+exec pandoc -f html-native_divs-native_spans \
+     -t markdown-bracketed_spans-raw_html-escaped_line_breaks-smart \
+     --wrap=none \
+     "$@"

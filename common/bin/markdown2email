@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+pandoc -f markdown -t html -s --metadata title= "$@" | html2email
