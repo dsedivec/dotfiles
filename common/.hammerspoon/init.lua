@@ -171,7 +171,7 @@ end
 
 lastUIAppearance = appearanceIsDark()
 
-hs.distributednotifications.new(
+watchThemeSwitch = hs.distributednotifications.new(
 	function(name, object, userInfo)
 		print("theme change notification running")
 		currentUIAppearance = appearanceIsDark()
@@ -184,5 +184,6 @@ hs.distributednotifications.new(
 		print("done with theme change")
 	end,
 	'AppleInterfaceThemeChangedNotification'
-):start()
+)
+watchThemeSwitch:start()
 print("theme change notification watching")
