@@ -16,7 +16,7 @@
 #
 # This is loaded before the SSC developer's .bashrc (below) so it can
 # pick up that we have the Git completion stuff.
-if [ -z "$BASH_COMPLETION" -o ! -r "$BASH_COMPLETION" ]; then
+if [ -z "$BASH_COMPLETION" ] || [ ! -r "$BASH_COMPLETION" ]; then
 	for dir in /etc /opt/local/etc; do
 		script=$dir/bash_completion
 		if [ -r "$script" ]; then
@@ -55,7 +55,8 @@ fi
 
 # Tests if a program is available.
 is_available () {
-	local where=$(which "$1" 2>&1)
+	local where
+	where=$(which "$1" 2>&1)
 	[ -x "$where" ]
 	return $?
 }  # is_available
@@ -136,7 +137,7 @@ new_PATH=:
 saved_IFS=$IFS
 IFS=:
 for dir in $PATH; do
-	if [ -n "${new_PATH##*:$dir:*}" -a -d "$dir" ]; then
+	if [ -n "${new_PATH##*:$dir:*}" ] && [ -d "$dir" ]; then
 		new_PATH=$new_PATH$dir:
 	fi
 done
@@ -151,15 +152,14 @@ vipath() {
 	local temp_file
 	# This mktemp invocation works on both OS X and Linux, though it
 	# doesn't do what you expect in OS X.
-	temp_file=$(mktemp -t vipath.XXXXXXXX)
-	if [ $? -ne 0 -o ! -O "$temp_file" ]; then
+	if ! temp_file=$(mktemp -t vipath.XXXXXXXX) || [ ! -O "$temp_file" ]; then
 		echo "couldn't create temp file $temp_file" >&2
 		return 1
 	fi
 	echo "$PATH" | tr ':' '\n' > "$temp_file"
 	if "$EDITOR" "$temp_file"; then
 		local new_path
-		while read line; do
+		while read -r line; do
 			# Strip whitespace.
 			line=$(echo "$line" | sed 's/^[[:space:]]*//g; s/[[:space:]]*$//g')
 			if [ -n "$line" ]; then
@@ -226,10 +226,10 @@ shopt -s extglob
 export TZ=America/Chicago
 export LC_COLLATE=C
 
-if [ -d $HOME/Maildir/ ]
+if [ -d "$HOME/Maildir/" ]
 then
 	MAIL=$HOME/Maildir/
-elif [ -d $HOME/Mailbox ]
+elif [ -d "$HOME/Mailbox" ]
 then
 	MAIL=$HOME/Mailbox
 fi
@@ -262,17 +262,16 @@ ulimit -c unlimited
 # Newer sudo changes umask behavior.  This restores the old behavior
 # and keeps people at work from yelling at me when I touch critical
 # files under sudo and accidentally tighten their permissions.
-if [ $? -eq 0 ]; then
-	sudo() {
-		local status old_umask=$(umask)
-		# 0022 is the old default sudo umask, AFAIK.
-		umask 0022
-		command sudo "$@"
-		status=$?
-		umask "$old_umask"
-		return $status
-	}
-fi
+sudo() {
+	local status old_umask
+	old_umask=$(umask)
+	# 0022 is the old default sudo umask, AFAIK.
+	umask 0022
+	command sudo "$@"
+	status=$?
+	umask "$old_umask"
+	return $status
+}
 
 # Which ls to use.  MacPorts GNU ls is "gls" and that'll give us all
 # the options and colors we're used to.
@@ -295,7 +294,7 @@ ls() { command "$LS" $LS_FLAGS "$@"; }
 # Enable color support in GNU ls.  dircolors taken from Ubuntu
 # /etc/skel/.bashrc.
 if [ "$TERM" != "dumb" ] && is_available "$dircolors"; then
-	eval $("$dircolors" --sh "$HOME/.dircolors")
+	eval "$("$dircolors" --sh "$HOME/.dircolors")"
 	LS_FLAGS="$LS_FLAGS --color=auto"
 fi
 
@@ -335,8 +334,8 @@ fi
 VISUAL="$EDITOR"
 export VISUAL EDITOR
 
-REAL_RIPGREP=$(type -P rg)
-if [ $? -eq 0 ]; then
+
+if REAL_RIPGREP=$(type -P rg); then
 	rg() {
 		if [[ -t 0 && -t 1 ]]; then
 			"$REAL_RIPGREP" -p "$@" | "${PAGER:-less}"
@@ -413,9 +412,9 @@ get_screen_auth_sock() { echo ~/.ssh/agent-screen-"$1"; }
 
 # Clean up dead sockets.
 find ~/.ssh -maxdepth 1 -path "$(get_screen_auth_sock '*')" -type l \
-	| while read link
+	| while read -r link
 do
-	[ -e "$link" ] || rm -f $link
+	[ -e "$link" ] || rm -f "$link"
 done
 
 sshscreen() {
@@ -429,42 +428,44 @@ sshscreen() {
 		return 1
 	fi
 
-	local OPTIND=1 opt pattern session num_sessions sock
-	local create=0 reattach=0 set_name=""
+	local OPTIND=1 opt session num_sessions sock
+	local -a pattern=()
+	local create=0 reattach=0
+	local -s set_name=()
 	while getopts ":r:x:d:R:D:S:" opt; do
 		if [ -z "${opt##[rxdRD]}" ]; then
 			reattach=1
 			if [ -z "${OPTARG##-[a-zA-Z]}" ]; then
-				OPTIND=$(($OPTIND - 1))
+				OPTIND=$((OPTIND - 1))
 			else
-				pattern="-S $OPTARG"
+				pattern=(-S "$OPTARG")
 			fi
-		elif [ "$opt" = ":" -a -z "${OPTARG##[rxdRD]}" ]; then
+		elif [ "$opt" = ":" ] && [ -z "${OPTARG##[rxdRD]}" ]; then
 			# Reattach option with no option argument.
 			reattach=1
 		elif [ "$opt" = "S" ]; then
 			create=1
 			session="$OPTARG"
-		elif [ "$opt" = ":" -a "$OPTARG" = "S" ]; then
+		elif [ "$opt" = ":" ] && [ "$OPTARG" = "S" ]; then
 			echo "-S requires an argument" >&2
 			return 1
 		fi
 	done
 
-	if [ $create -eq 1 -a $reattach -eq 1 ]; then
+	if [ $create -eq 1 ] && [ $reattach -eq 1 ]; then
 		echo "sshscreen can't handle -S and a reattach option as well" >&2
 		return 1
-	elif [ $create -eq 0 -a $reattach -eq 0 ]; then
+	elif [ $create -eq 0 ] && [ $reattach -eq 0 ]; then
 		# I assume we're creating a new session.  I attempt to mimic
 		# the default Screen session name here.  I fear the
 		# portability of "hostname -s".  (I mean, really, I fear the
 		# portability of a whole lot of this.)
 		create=1
 		session="$(tty | sed 's!^/dev/!!; s/[^a-zA-Z0-9]/-/g').$(hostname -s)"
-		set_name="-S $session"
+		set_name=(-S "$session")
 	elif [ $reattach -eq 1 ]; then
 		# Three argument form of match() is a GNU extension.
-		session=$(screen $pattern -ls \
+		session=$(screen "${pattern[@]}" -ls \
 			      | gawk '/[ \t]+[0-9]+/{match($0, /[0-9]+\.([^ \t]+)/, m);
 	                                     print m[1]; c = c + 1} END{exit(c)}')
 		num_sessions=$?
@@ -473,13 +474,13 @@ sshscreen() {
 			return 1
 		elif [ $num_sessions -gt 1 ]; then
 			echo "more than one matching session, please be more specific" >&2
-			screen $pattern -ls
+			screen "${pattern[@]}" -ls
 			return 1
 		fi
 	fi
 
 	if [ $create -eq 1 ]; then
-		find $SCREENDIR -print | sed 's/^[0-9]*\.//' | fgrep -q -- "$session"
+		find $SCREENDIR -print | sed 's/^[0-9]*\.//' | grep -F -q -- "$session"
 		if [ $? -eq 0 ]; then
 			# We can't have a duplicate session name, because they
 			# would share the same SSH agent socket.  Note that by
@@ -492,13 +493,13 @@ sshscreen() {
 	fi
 
 	sock=$(get_screen_auth_sock "$session")
-	if [ -e "$SSH_AUTH_SOCK" -a \( ! -e "$sock" -o -L "$sock" \) ]; then
+	if [[ -e "$SSH_AUTH_SOCK" && ( ! -e "$sock" || -L "$sock" ) ]]; then
 		ln -sf "$SSH_AUTH_SOCK" "$sock"
 	fi
 
 	# It isn't necessary to specify SSH_AUTH_SOCK when doing a
 	# reattach, only when creating a new session.
-	SSH_AUTH_SOCK=$sock screen $set_name "$@"
+	SSH_AUTH_SOCK=$sock screen "${set_name[@]}" "$@"
 }
 
 
@@ -511,7 +512,7 @@ sshscreen() {
 # http://unix.stackexchange.com/a/14896 was the one that hooked me.
 # Maybe I should change my PATH stuff up top to do this instead of
 # manipulating IFS.)
-PYTHONPATH=$(echo -n $PYTHONPATH |
+PYTHONPATH=$(echo -n "$PYTHONPATH" |
 	awk -v RS=: -v ORS=: '!p[$0]++ && $0 !~ /^\.?$/')
 # Damn that trailing ORS.
 PYTHONPATH=${PYTHONPATH%:}
@@ -773,8 +774,7 @@ unset fzf_bindings
 
 vimkill () {
 	local temp_file
-	temp_file=$(mktemp -t vimkillXXXXXXXXXX)
-	if [ $? -ne 0 ]; then
+	if ! temp_file=$(mktemp -t vimkillXXXXXXXXXX); then
 		echo "mktemp failed" >&2
 		return 1
 	fi
