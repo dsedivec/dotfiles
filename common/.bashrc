@@ -673,26 +673,97 @@ then
 	# Or else this is going to break horribly in ways I can't predict.
 	complete -D -F _fzf_path_completion -o default -o bashdefault
 
-	# Hack fzf into Git's completion for branches.  May not work
-	# everywhere.  Probably also breaks the ** trigger on Git
-	# commands; use M-i (see above).
+	# Here is a generic wrapper around an existing completion function
+	# to choose from its resulting candidates with fzf.  See below
+	# usage as with Git.
 
-	_completion_loader git
-
-	eval __orig"$(declare -f __gitcomp_direct)"
-
-	__gitcomp_direct ()
-	{
-		# Fun fact: Bash (at least my current version here from
-		# MacPorts) seems to remove duplicates from COMPREPLY.  fzf
-		# doesn't.
-		if [[ -z "$1" ]] \
-			|| ! FZF_COMPLETION_TRIGGER='' _fzf_complete '' '' < <(
-				   echo "$1" | sort -u )
-		then
-			__orig__gitcomp_direct "$@"
+	# Call with completion function as first argument, followed by the
+	# rest of the arguments the completion function should be given.
+	__fzf_completion_function_wrapper () {
+		local func
+		func=$1
+		shift 1
+		"$func" "$@" || return
+		# If the completion function did not fill out COMPREPLY (an
+		# array) with candidates, then skip running fzf.
+		if [ "${#COMPREPLY[@]}" -gt 0 ]; then
+			# _fzf_complete is the documented fzf method for making a
+			# custom completion command.
+			#
+			# If you look at the code for _fzf_complete, you'll see
+			# why we have to make it think its trigger is the empty
+			# string, but the simple explanation is that, if
+			# _fzf_complete doesn't see its trigger at the end of the
+			# line, it tries to pass through control to other
+			# completion providers.  Setting it to the empty string is
+			# an ugly hack, but now it will always find its (empty)
+			# trigger at the end of the line.
+			FZF_COMPLETION_TRIGGER='' _fzf_complete -- "$@" < <(
+				# This prints each element of COMPREPLY, one per line.
+				printf "%s\n" "${COMPREPLY[@]}"
+			)
 		fi
 	}
+
+	# Call with the name of a command that already has completion set
+	# up, in order to wrap its completion with fzf.
+	__fzf_wrap_existing_completion () {
+		local command=$1
+		local i cmd_func_idx complete_func='' wrapper_name
+		local -a complete_cmd
+		# Read the current completion specification into complete_cmd.
+		# This is the recommended way to do this, according to
+		# ShellCheck.
+		if ! IFS=" " read -r -a complete_cmd \
+		     <<< "$(complete -p "$command" | head -1)"; then
+			echo "No completion defined for $command" >&2
+			return 1
+		fi
+		# This iterates over all the indexes in complete_cmd.
+		for i in "${!complete_cmd[@]}"; do
+			# Look for the -F option to Bash's "complete" builtin and
+			# snag the function named after that option.
+			if [ "${complete_cmd[$i]}" = "-F" ]; then
+				cmd_func_idx=$((i + 1))
+				complete_func=${complete_cmd[$cmd_func_idx]}
+				break
+			fi
+		done
+		if [ -z "$complete_func" ]; then
+			echo "Cannot determine completion function for $command" >&2
+			return 2
+		fi
+		if [ "$(printf %q "$complete_func")" != "$complete_func" ]; then
+			echo "Name of completion function \"$complete_func\" looks" >&2
+			echo "dangerous, bailing" >&2
+			return 3
+		fi
+		wrapper_name=__fzf_wrapped__$complete_func
+		eval "$wrapper_name () {
+			__fzf_completion_function_wrapper '$complete_func' \"\$@\"
+		}"
+		# Re-execute the original completion command, but now with our
+		# function named instead of the original completion function.
+		complete_cmd[$cmd_func_idx]=$wrapper_name
+		"${complete_cmd[@]}"
+	}
+
+	# Force immediate loading of Git completion functions, so
+	# __fzf_wrap_existing_completion can wrap them.
+	_completion_loader git
+
+	__fzf_wrap_existing_completion git
+	__fzf_wrap_existing_completion gitk
+
+	# This is the normal way to add fzf completion to a command in
+	# Bash, per fzf's docs.  Without this, "**" will not trigger fzf
+	# path completion.  This must be done after
+	# __fzf_wrap_existing_completion.  Note that our magic above to
+	# make fzf the default for all commands does not apply to git (and
+	# gitk) since they have specific completion functions.  (complete
+	# -o bashdefault apparently doesn't mean "call the default
+	# completion function if this one fails", much to my surprise.)
+	_fzf_setup_completion path git
 fi
 unset fzf_bindings
 
