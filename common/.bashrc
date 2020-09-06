@@ -657,7 +657,7 @@ then
 	# Put back my C-t, move FZF to M-i instead.  Emacs user checking in.
 	bind '"\C-t": transpose-chars'
 	# (This actually breaks in Bash < v4.)
-	bind -x '"\ei": "fzf-file-widget"'
+	bind -m emacs-standard -x '"\ei": fzf-file-widget'
 
 	FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} --bind alt-p:toggle-preview"
 	FZF_CTRL_R_OPTS="${FZF_CTRL_R_OPTS:-} --preview='echo {}' --preview-window=up:3:wrap"
