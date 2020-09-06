@@ -676,6 +676,17 @@ then
 	# Or else this is going to break horribly in ways I can't predict.
 	complete -D -F _fzf_path_completion -o default -o bashdefault
 
+	# Enable fzf completion with the first word on the line.  Need to
+	# use our own function to change $1 from "_InitialWorD_" (magic
+	# value) to "", in order to avoid recursion between fzf's
+	# functions and bash-completions' functions.
+	_fzf_complete_initial_word () {
+		shift 1
+		_fzf_path_completion "" "$@"
+	}
+
+	complete -I -F _fzf_complete_initial_word -o default -o bashdefault
+
 	# Here is a generic wrapper around an existing completion function
 	# to choose from its resulting candidates with fzf.  See below
 	# usage as with Git.
