@@ -60,3 +60,6 @@
 
 ;; Call my hook to sync up with current system state.
 (my-dark-mode-hook (auto-dark-mode.currently-dark?))
+
+{:    my-dark-mode-hook
+ :adm auto-dark-mode}

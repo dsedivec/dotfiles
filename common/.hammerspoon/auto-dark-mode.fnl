@@ -212,4 +212,5 @@
 {:start            start-auto-dark-mode
  :stop             stop-auto-dark-mode
  :hooks            dark-mode-hooks
+ :                 run-dark-mode-hooks
  :currently-dark?  currently-dark?}
