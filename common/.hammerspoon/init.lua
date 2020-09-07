@@ -82,24 +82,22 @@ tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
 		if status and rc == 0 then
 			delete_event = true
 		end
-		-- This always launches VLC the first time you run this after
-		-- Hammerspoon restarts.  See
-		-- https://stackoverflow.com/a/16071855/2305480 for possible
-		-- solutions.  Too lazy today.
-		local script = string.format([[
-			if application "VLC" is running then
-			  tell application "VLC"
-                if current time >= 0 then
-                  %s
-                  return true
-                end if
-			  end tell
-			end if
-            return false
-		]], VLC_COMMANDS[sys_key_event.key])
-		local success, sent_command = hs.osascript.applescript(script)
-		if success and sent_command then
-			delete_event = true
+		-- Only run AppleScript if VLC is running, since to do
+		-- otherwise would actually start VLC.
+		if hs.appfinder.appFromName("VLC") then
+			local script = string.format([[
+				tell application "VLC"
+				  if current time >= 0 then
+				    %s
+				    return true
+				  end if
+				end tell
+				return false
+			]], VLC_COMMANDS[sys_key_event.key])
+			local success, sent_command = hs.osascript.applescript(script)
+			if success and sent_command then
+				delete_event = true
+			end
 		end
 	elseif AIRFOIL_EVENTS[sys_key_event.key] and event:getFlags().ctrl then
 		local script = string.format([[
