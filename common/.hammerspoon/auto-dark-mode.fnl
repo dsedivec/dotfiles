@@ -15,7 +15,7 @@
   (let [is-dark (if (= ?is-dark nil)
                     (currently-dark?)
                     ?is-dark)]
-    (each [hook dark-mode-hooks]
+    (each [_ hook (ipairs dark-mode-hooks)]
       (hook is-dark))))
 
 (lambda get-macos-theme-switch-capabilities []
