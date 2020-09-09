@@ -185,6 +185,12 @@
     (theme-switch-caffeinate-watcher:stop)
     (set theme-switch-caffeinate-watcher nil)))
 
+(lambda start-caffeinate-watcher  []
+  (stop-caffeinate-watcher)
+  (set theme-switch-caffeinate-watcher
+       (hs.caffeinate.watcher.new handle-caffeinate-event))
+  (theme-switch-caffeinate-watcher:start))
+
 
 ;;; Catalina support
 
@@ -217,9 +223,7 @@
     ;; Mojave has no automatic theme switching, so we use our own.
     :manual (do
               (update-auto-dark-mode-and-timer)
-              (stop-caffeinate-watcher)
-              (set theme-switch-caffeinate-watcher
-                   (hs.caffeinate.watcher.new handle-caffeinate-event)))
+              (start-caffeinate-watcher))
     ;; Listen for built-in theme switching.  (TODO: Turn on/off
     ;; automatic switching ourselves.)
     :automatic (start-notification-watcher)
