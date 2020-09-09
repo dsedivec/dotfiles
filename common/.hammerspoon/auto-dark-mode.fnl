@@ -15,6 +15,7 @@
   (let [is-dark (if (= ?is-dark nil)
                     (currently-dark?)
                     ?is-dark)]
+    (print "Running dark mode hooks")
     (each [_ hook (ipairs dark-mode-hooks)]
       (hook is-dark))))
 
@@ -100,7 +101,7 @@
 
 (lambda set-dark-mode [is-dark]
   (when (not= is-dark (currently-dark?))
-    (print (.. "Changing to " (if is-dark "dark" "light") " mode"))
+    (print (.. "Changing theme to " (if is-dark "dark" "light") " mode"))
     (hs.osascript.applescript (.. "tell application \"System Events\""
                                   " to tell appearance preferences"
                                   " to set dark mode to "
@@ -110,6 +111,7 @@
 (var theme-switch-timer nil)
 
 (lambda auto-set-dark-mode-and-schedule-change []
+  (print "Entered auto-set-dark-mode-and-schedule-change")
   (get-location
    (lambda [loc]
      (let [now (os.time)
@@ -126,24 +128,43 @@
                             (hs.location.sunrise lat lon utc-offset
                                                  (get-tomorrow)))
                         ;; Sunset today
-                        sunset)]
+                        sunset)
+           next-run-secs (math.max (- next-run (os.time)) 0)]
        (print (.. "Sunrise is " (os.date "%c" sunrise) " " sunrise))
        (print (.. "Sunset is  " (os.date "%c" sunset)  " " sunset))
        (print (.. "Now is     " (os.date "%c" now)     " " now))
        (print (.. "Dark mode should be " (tostring is-dark)))
        (set-dark-mode is-dark)
        (set theme-switch-timer
-            (hs.timer.doAfter (math.max (- next-run (os.time)) 0)
+            (hs.timer.doAfter next-run-secs
                               auto-set-dark-mode-and-schedule-change))
        (print (.. "Scheduled theme switch for "
-                  (os.date "%c" next-run)))))))
+                  (os.date "%c" next-run)
+                  " (" (tostring next-run-secs) " seconds)"))
+       (print (.. "Timer is " (tostring theme-switch-timer)))))))
 
 (lambda stop-timer []
   (when theme-switch-timer
+    (print "Stopping auto dark mode timer")
     (theme-switch-timer:stop)
     (set theme-switch-timer nil)))
 
+;; This is just for debugging.
+(lambda get-timer []
+  theme-switch-timer)
+
 (lambda update-auto-dark-mode-and-timer []
+  (print "Restarting auto dark mode")
+  (print (.. "Timer is "
+             (if theme-switch-timer
+                 (.. (tostring theme-switch-timer)
+                     " and is "
+                     (if (theme-switch-timer:running)
+                         (.. "running and set for "
+                             (tostring (theme-switch-timer:nextTrigger))
+                             " second(s)")
+                         "NOT RUNNING"))
+                 "nil/false")))
   (stop-timer)
   (auto-set-dark-mode-and-schedule-change))
 
@@ -153,11 +174,14 @@
 (var theme-switch-caffeinate-watcher nil)
 
 (lambda handle-caffeinate-event [event]
+  (print "Auto dark mode got caffeinate event")
   (when (= event hs.caffeinate.watcher.systemDidWake)
+    (print "Dispatching")
     (update-auto-dark-mode-and-timer)))
 
 (lambda stop-caffeinate-watcher []
   (when theme-switch-caffeinate-watcher
+    (print "Auto dark mode stopping caffeinate watcher")
     (theme-switch-caffeinate-watcher:stop)
     (set theme-switch-caffeinate-watcher nil)))
 
@@ -213,4 +237,6 @@
  :stop             stop-auto-dark-mode
  :hooks            dark-mode-hooks
  :                 run-dark-mode-hooks
- :currently-dark?  currently-dark?}
+ :currently-dark?  currently-dark?
+ :get-timer        get-timer
+ :update           update-auto-dark-mode-and-timer}
