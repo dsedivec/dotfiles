@@ -192,7 +192,7 @@
   (theme-switch-caffeinate-watcher:start))
 
 
-;;; Catalina support
+;;; System theme switch notification, Mojave and later
 
 ;; The OS auto-switches and we just listen for an event.  This code
 ;; was originally derived from
@@ -205,11 +205,13 @@
 
 (lambda stop-notification-watcher []
   (when notification-watcher
+    (print "Stopping notification watcher")
     (notification-watcher:stop)
     (set notification-watcher nil)))
 
 (lambda start-notification-watcher []
   (stop-notification-watcher)
+  (print "Starting notification watcher")
   (set notification-watcher
        (hs.distributednotifications.new react-to-system-theme-switch
                                         "AppleInterfaceThemeChangedNotification"))
@@ -219,23 +221,20 @@
 ;;; Public API
 
 (lambda start-auto-dark-mode []
-  (match (get-macos-theme-switch-capabilities)
-    ;; Mojave has no automatic theme switching, so we use our own.
-    :manual (do
-              (update-auto-dark-mode-and-timer)
-              (start-caffeinate-watcher))
-    ;; Listen for built-in theme switching.  (TODO: Turn on/off
-    ;; automatic switching ourselves.)
-    :automatic (start-notification-watcher)
-    _ (error "Dark mode not supported")))
+  (let [cap (get-macos-theme-switch-capabilities)]
+    (assert (or (= cap :manual) (= cap :automatic)))
+    (when (= cap :manual)
+      (update-auto-dark-mode-and-timer)
+      (start-caffeinate-watcher))
+    (start-notification-watcher)))
 
 (lambda stop-auto-dark-mode []
-  (match (get-macos-theme-switch-capabilities)
-    :manual (do
-              (stop-timer)
-              (stop-caffeinate-watcher))
-    :automatic (stop-notification-watcher)
-    _ (error "Dark mode not supported")))
+  (let [cap (get-macos-theme-switch-capabilities)]
+    (assert (or (= cap :manual) (= cap :automatic)))
+    (when (= cap :manual)
+      (stop-timer)
+      (stop-caffeinate-watcher))
+    (stop-notification-watcher)))
 
 {:start            start-auto-dark-mode
  :stop             stop-auto-dark-mode
