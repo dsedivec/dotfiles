@@ -605,6 +605,8 @@ fi
 
 if command -v zoxide >/dev/null; then
 	eval "$(zoxide init bash)"
+	# Make it more like good ol' fasd.
+	alias zz=zi
 elif command -v fasd >/dev/null; then
 	eval "$(fasd --init auto)"
 fi
