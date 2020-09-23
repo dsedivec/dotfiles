@@ -661,7 +661,7 @@ then
 	# (This actually breaks in Bash < v4.)
 	bind -m emacs-standard -x '"\ei": fzf-file-widget'
 
-	FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} --height 40% --layout=reverse --border --bind alt-p:toggle-preview"
+	FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --bind alt-p:toggle-preview"
 	export FZF_DEFAULT_OPTS
 	FZF_COMPLETION_TRIGGER='xx'
 	FZF_CTRL_R_OPTS="${FZF_CTRL_R_OPTS:-} --preview='echo {}' --preview-window=up:3:wrap"
