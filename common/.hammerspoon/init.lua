@@ -119,13 +119,14 @@ tap:start()
 
 hs.loadSpoon("ControlEscape"):start()
 
+HS_LUA_ROOT = os.getenv("HOME") .. "/.hammerspoon/lua"
+
 -- I don't have a /usr/local/share/lua.  (Maybe I would if I used
--- Homebrew.)  I do have a /opt/local/share/lua, helpfully emplaced by
--- MacPorts, and I need to load LuaRocks from it, also installed via
--- MacPorts.
-package.path = package.path:gsub('/usr/local/share/lua/5.3',
-                                 '/opt/local/share/lua/5.3')
-require 'luarocks.loader'
+-- Homebrew.)  Replace it with the Lua that I install in
+-- ~/.hammerspoon because MacPorts doesn't (yet) ship Lua 5.4, and
+-- that is the Lua version Hammerspoon uses as of this writing.
+package.path = package.path:gsub('/usr/local', HS_LUA_ROOT)
+package.cpath = package.cpath:gsub('/usr/local', HS_LUA_ROOT)
 -- Fennel expects the "arg" table to exist, which (I think) is where
 -- argv is stored in Lua.
 arg = {}
