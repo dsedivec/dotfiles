@@ -715,8 +715,9 @@ then
 			# an ugly hack, but now it will always find its (empty)
 			# trigger at the end of the line.
 			FZF_COMPLETION_TRIGGER='' _fzf_complete -- "$@" < <(
-				# This prints each element of COMPREPLY, one per line.
-				printf "%s\n" "${COMPREPLY[@]}"
+				# This prints each unique element of COMPREPLY, one
+				# per line.
+				printf "%s\n" "${COMPREPLY[@]}" | sort -u
 			)
 		fi
 	}
