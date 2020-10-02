@@ -680,8 +680,8 @@ then
 
 	# Enable fzf completion with the first word on the line.  Need to
 	# use our own function to change $1 from "_InitialWorD_" (magic
-	# value) to "", in order to avoid recursion between fzf's
-	# functions and bash-completions' functions.
+	# value in Bash, I *think*) to "", in order to avoid recursion
+	# between fzf's functions and bash-completions' functions.
 	_fzf_complete_initial_word () {
 		shift 1
 		_fzf_path_completion "" "$@"
