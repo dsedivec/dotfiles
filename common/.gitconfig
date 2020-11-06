@@ -25,6 +25,7 @@
 	whitespace = error
 [alias]
 	ssb = status -sb
+	dc = diff --cached
 	co = checkout
 	wdiff = diff --word-diff
 	conflicts = diff --name-only --diff-filter=U --relative
