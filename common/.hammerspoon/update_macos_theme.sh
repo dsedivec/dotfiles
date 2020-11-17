@@ -25,7 +25,7 @@ case "$dark_mode" in
 esac
 
 export PATH=$HOME/bin:/opt/local/bin:$PATH
-ITERM2_PYTHON_VERSION=3.8.0
+ITERM2_PYTHON_VERSION=3.8.6
 TEXTUAL_AUTO_STYLE_NAME="Simplified Auto"
 TEXTUAL_APP=$HOME/Applications/Textual.app
 
