@@ -37,7 +37,9 @@ my_dir=$(dirname "$0")
 cd "$my_dir" || exit 1
 
 # Emacs
-emacsclient -a true --eval "(my:set-theme-for-macos-system-theme)" || result=1
+emacsclient -a true \
+            --eval "(run-at-time 0 nil #'my:set-theme-for-macos-system-theme)" \
+	|| result=1
 
 # iTerm 2
 if pgrep iTerm2; then
