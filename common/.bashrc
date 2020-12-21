@@ -213,7 +213,7 @@ shopt -s histappend
 # Append after every command.  I'm hoping this prevents the last shell
 # to exit from obliterating the history of every other shell I have
 # open.
-PROMPT_COMMAND="history -a; ${PROMPT_COMMAND:-}"
+PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND}; }history -a"
 
 # check the window size after each command and, if necessary, update
 # the values of LINES and COLUMNS.  (Stolen from Ubuntu; RH/FC does
@@ -913,7 +913,7 @@ if [[ "$PS1" ]]; then
 			PS1="${BASH_REMATCH[2]}(${BASH_REMATCH[1]}) ${BASH_REMATCH[3]}"
 		fi
 	}
-	PROMPT_COMMAND="_prompt_command; $PROMPT_COMMAND"
+	PROMPT_COMMAND="_prompt_command${PROMPT_COMMAND:+; ${PROMPT_COMMAND}}"
 	PS1='\[${_fancy_prompt_color}\]☰ \u@\h \[${_fancy_prompt_reset}\] \W \$ '
 fi
 
