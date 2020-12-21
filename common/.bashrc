@@ -73,7 +73,7 @@ export POSTGRESQL
 # Note use of && here to short-circuit calling uname -i when the
 # directories aren't found, which is useful on OS X where uname -i
 # creates an error (and where neither of the lib64 directories exist).
-if [ -e /lib64 -o -d /usr/lib64 ] && [ "$(uname -i)" = "x86_64" ]; then
+if [[ (-e /lib64 || -d /usr/lib64) && "$(uname -i)" = "x86_64" ]]; then
 	LIB="lib64"
 else
 	LIB="lib"
