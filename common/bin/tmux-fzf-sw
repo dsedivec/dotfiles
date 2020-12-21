@@ -2,11 +2,6 @@
 
 set -uo pipefail
 
-if [[ $# -gt 1 || ($# -eq 1 && $1 != "last") ]]; then
-	echo "bad usage" >&2
-	exit 1
-fi
-
 current_session=$(tmux display -p '#{client_session}') || exit 1
 client_name=$(tmux display -p '#{client_name}' | sed 's/[^A-Za-z0-9_]/_/g') ||
 	exit 1
@@ -20,6 +15,13 @@ fmt="$fmt #{session_last_attached} #{window_stack_index}"
 # Session and window ID to switch to
 fmt="$fmt #{session_id}:#{window_id}"
 
+add_human_fmt() {
+	# Add human-readable bits to $fmt.
+	fmt="$fmt #{p15:session_name} #{p3:window_index} #{p40:window_name}"
+	# Add number of panes in the window
+	fmt="$fmt (#{window_panes} pane#{?#{==:#{window_panes},1},,s})"
+}
+
 list_and_sort_windows() {
 	tmux list-windows -aF "$fmt" | sort -k 1nr -k 2nr -k 3nr -k 4n
 }
@@ -28,18 +30,28 @@ parse_result_and_switch_window() {
 	cut -d' ' -f5 | xargs tmux switch-client -Zt
 }
 
+if [[ $# -gt 1 ]]; then
+	echo "Usage: $(progname "$0") [ last | debug-list ]" >&2
+	exit 1
+elif [[ $# -eq 1 ]]; then
+	case "$1" in
+		last)
+			list_and_sort_windows | head -1 | parse_result_and_switch_window
+			;;
 
-if [[ $# -eq 1 && $1 = "last" ]]; then
-	list_and_sort_windows | head -1 | parse_result_and_switch_window
+		debug-list)
+			add_human_fmt
+			list_and_sort_windows
+			;;
+
+		*)
+			echo "Unknown argument \"$1\"" >&2
+			exit 1
+	esac
 else
-	# Display for humans
-	fmt="$fmt #{p15:session_name} #{p3:window_index} #{p40:window_name}"
-	# Add number of panes in the window
-	fmt="$fmt (#{window_panes} pane#{?#{==:#{window_panes},1},,s})"
-
+	add_human_fmt
 	# Matching fzf header for the human display bits.
 	header="$(printf '%-15s #   %-40s %s' Session Window Panes)" || exit 1
-
 	list_and_sort_windows |
 		fzf-tmux -p --header "$header"  --layout=reverse --with-nth=6.. \
 		         --bind "alt-w:abort+execute(tmux choose-tree -Zw)" \
