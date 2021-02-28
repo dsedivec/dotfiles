@@ -65,7 +65,7 @@
             (callback loc-serv-loc)
             (hs.http.asyncGet "https://ipinfo.io"
                               {"Accept" "application/json"}
-                              (lambda [status body _]
+                              (lambda [status body ?_]
                                 (if (= status 200)
                                     (let [resp (hs.json.decode body)
 
