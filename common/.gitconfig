@@ -24,6 +24,7 @@
 [apply]
 	whitespace = error
 [alias]
+	b = branch
 	ssb = status -sb
 	dc = diff --cached
 	co = checkout
