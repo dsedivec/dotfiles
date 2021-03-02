@@ -1,4 +1,4 @@
-personal_ws-1.1 en 167 
+personal_ws-1.1 en 168 
 ACMF
 API
 AWS
@@ -30,6 +30,7 @@ IPsec
 Iteratively
 JSON
 Kanban
+Kubernetes
 LLC
 LaTeX
 Linux's
@@ -137,6 +138,7 @@ reviewable
 résumé
 résumés
 sanitization
+scalable
 screenshot
 screenshots
 searchable
