@@ -1,3 +1,4 @@
 --langdef=cheetah
 --langmap=cheetah:(*.html.translate).html
+--langmap=cheetah:+.cheetah
 --regex-cheetah=/^#def[ \t]*([a-zA-Z0-9_]+)/\1/d,definition/
