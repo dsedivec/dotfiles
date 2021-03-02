@@ -829,6 +829,19 @@ vimkill () {
 # This comes at/near the bottom to make sure it can put itself first
 # in PROMPT_COMMAND.  Without doing that, we can't see the value of $?.
 
+vterm_printf() {
+	if [ -n "$TMUX" ]; then
+		# Tell tmux to pass the escape sequences through
+		# (Source: http://permalink.gmane.org/gmane.comp.terminal-emulators.tmux.user/1324)
+		printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+	elif [ "${TERM%%-*}" = "screen" ]; then
+		# GNU screen (screen, screen-256color, screen-256color-bce)
+		printf "\eP\e]%s\007\e\\" "$1"
+	else
+		printf "\e]%s\e\\" "$1"
+	fi
+}
+
 # Bash manual documents testing PS1 as a valid way to know if you're
 # in an interactive shell.
 if [[ "$PS1" ]]; then
@@ -915,6 +928,14 @@ if [[ "$PS1" ]]; then
 	}
 	PROMPT_COMMAND="_prompt_command${PROMPT_COMMAND:+; ${PROMPT_COMMAND}}"
 	PS1='\[${_fancy_prompt_color}\]☰ \u@\h \[${_fancy_prompt_reset}\] \W \$ '
+	if [ "$INSIDE_EMACS" = vterm ]; then
+		vterm_prompt_end(){
+			vterm_printf "51;A$(whoami)@$(hostname):$(pwd)"
+		}
+		PS1=$PS1'\[$(vterm_prompt_end)\]'
+		PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND}; }
+		                echo -ne \"\033]0;${HOSTNAME%%.*}:${PWD}\007\""
+	fi
 fi
 
 
