@@ -62,7 +62,7 @@ MPD_COMMANDS = {PLAY = "toggle"; FAST = "next"; REWIND = "prev"}
 VLC_COMMANDS = {PLAY = "play"; FAST = "next"; REWIND = "previous"}
 AIRFOIL_EVENTS = {SOUND_UP = "+", SOUND_DOWN = "-"}
 DEBUG_TAP = false
-tap = hs.eventtap.new({hs.eventtap.event.types.NSSystemDefined}, function(event)
+tap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(event)
 	if DEBUG_TAP then
 		print("event tap debug got event:")
 		print(hs.inspect.inspect(event:getRawEventData()))
