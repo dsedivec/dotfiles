@@ -29,7 +29,7 @@ ITERM2_PYTHON_VERSION=3.8.6
 TEXTUAL_AUTO_STYLE_NAME="Simplified Auto"
 TEXTUAL_APP=$HOME/Applications/Textual.app
 
-ITERM2_PYTHONS=$HOME/Library/ApplicationSupport/iTerm2/iterm2env/versions
+ITERM2_PYTHONS=$HOME/Library/Application\ Support/iTerm2/iterm2env/versions
 TEXTUAL_APP_STYLES=$TEXTUAL_APP/Contents/Resources/Bundled\ Styles
 TEXTUAL_USER_STYLES=$HOME/Library/Group\ Containers/com.codeux.apps.textual/Library/Application\ Support/Textual/Styles
 
