@@ -1,0 +1,389 @@
+#!/usr/bin/env python3
+
+import argparse
+import dataclasses
+import fractions
+import json
+import locale
+import logging as _logging
+import math
+import pathlib
+import re
+import subprocess
+import sys
+
+
+logger = _logging.getLogger(__spec__)
+
+
+@dataclasses.dataclass
+class Chapter:
+    start: int
+    end: int
+    time_base: fractions.Fraction
+    title: int
+
+    @property
+    def duration(self):
+        return self.end - self.start
+
+    @property
+    def duration_secs(self):
+        return int(self.duration * self.time_base)
+
+    def change_time_base(self, new_time_base: fractions.Fraction):
+        if self.time_base != new_time_base:
+            start = int((self.start * self.time_base) / new_time_base)
+            end = int((self.end * self.time_base) / new_time_base)
+            self.start, self.end, self.time_base = start, end, new_time_base
+
+
+def parse_timebase(timebase_str):
+    return fractions.Fraction(timebase_str)
+
+
+FFMETADATA_MAGIC = ";FFMETADATA1\n"
+
+
+def parse_ffmetadata_sections(content):
+    # ffmetadata: https://ffmpeg.org/ffmpeg-formats.html#toc-Metadata-1
+    #
+    # Looks vaguely like INI format, with # as an additional line
+    # comment character.
+    if not content.startswith(FFMETADATA_MAGIC):
+        raise Exception(
+            f"Did not find {FFMETADATA_MAGIC} at start of ffmetadata"
+        )
+    pos = len(FFMETADATA_MAGIC)
+    content = content[pos:]
+    while content:
+        logger.debug(
+            "Looking for new section, starting with: %r", content[:100]
+        )
+        match = re.search(
+            r"""
+            # Must match from start of the string.
+            \A
+
+            # Maybe a section heading.  Will not match for global
+            # metadata, should match every time after that.
+            (?: ^\[[^=;#\\\]]+\]\s* \n )?
+
+            # Match up to the next [SECTION].  Must ignore
+            # backslash-escaped newline, =, ;, #, and \ itself.  We use
+            # re.S so that . will match newline.
+            (?: \\[\n=;#\\] | . )*?
+
+            # Positive lookahead assertion for a [SECTION] heading, or
+            # else EOF.
+            (?= ^\[[^=;#\\\]]+\]\s*$ | \Z )
+
+            """,
+            content,
+            re.S | re.M | re.X,
+        )
+        if not match:
+            raise Exception(
+                "ffmetadata parse error at or after position %d" % (pos,)
+            )
+        section = content[: match.end()]
+        logger.debug("Returning section: %r", section)
+        yield section
+        pos += match.end()
+        content = content[match.end() :]
+
+
+def escape_ffmetadata_value(a_string):
+    return re.sub(r"[\n=;#\\]", r"\\\g<0>", a_string)
+
+
+def unescape_ffmetadata_value(a_string):
+    return re.sub(r"\\([\n=;#\\])", r"\1", a_string)
+
+
+def parse_ffmetadata_key_value_pairs(content):
+    while content:
+        logger.debug("Parsing KV pairs starting with: %r", content[:100])
+        match = re.search(
+            r"""
+            \A
+            (?:
+
+                # Blank line or comment
+                (?P<comment> \s*([#;].*)? \n)
+
+                |
+
+                # key=value
+                (?:
+                    (?P<key> (?: \\[\n=;#\\] | . )+? )
+                    =
+                    (?P<value> (?: \\[\n=;#\\] | . )* )
+                    \n
+                )
+
+            )
+            """,
+            content,
+            re.X,
+        )
+        if not match:
+            raise Exception(
+                "Can't parse ffmetadata: %s" % (content.split("\n", 1)[0],)
+            )
+        assert match.end() > 0, repr(content[:100])
+        content = content[match.end() :]
+        groups = match.groupdict()
+        logger.debug("KV parse groupdict: %r", groups)
+        if groups.get("comment"):
+            continue
+        yield tuple(
+            unescape_ffmetadata_value(field)
+            for field in (groups["key"], groups["value"])
+        )
+        assert match.end() > 0
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(
+        prog=argv[0],
+        description="""\
+Make a single ffmpeg chapter description for a series of files that
+will later be concatenated into a single file.
+
+If multiple files are given, any files without their own chapters will
+be made into one big chapter in the final output.
+
+If only a single input file is given, the file will be split into
+chapters at regular intervals: see --auto-chapter-len and related
+options.""",
+    )
+    parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument("--debug", "-d", action="store_true")
+    parser.add_argument("--ffmpeg", default="ffmpeg")
+    parser.add_argument(
+        "--time-base",
+        default=fractions.Fraction(1, 1000),
+        type=parse_timebase,
+        help="Time base to coerce all times to",
+    )
+    parser.add_argument(
+        "--min-chapter-len",
+        type=int,
+        default=10,
+        metavar="LEN",
+        help="Ignore chapters shorter than LEN",
+    )
+    parser.add_argument(
+        "--number-titles",
+        "-N",
+        action="store_true",
+        help="All chapter titles become numbers, overwriting existing titles",
+    )
+    parser.add_argument("--number-title-fmt", default="%0.3d")
+    parser.add_argument(
+        "--allow-global-key",
+        "--agk",
+        dest="allowed_global_keys",
+        action="append",
+        default=[
+            "album",
+            "artist",
+            "comment",
+            "composer",
+            "date",
+            "description",
+            "encoder",
+            "genre",
+            "title",
+        ],
+    )
+    parser.add_argument(
+        "--no-auto-chapters",
+        dest="auto_chapters",
+        action="store_false",
+        help=(
+            "Don't automatically make a single big chapter for a file with"
+            " no chapters, or chapters at regular intervals for a single file"
+            " with no chapters."
+        ),
+    )
+    parser.add_argument(
+        "--auto-chapter-len",
+        metavar="MINUTES",
+        type=int,
+        default=30,
+        help=(
+            "For a single input file with no chapters, make a chapter"
+            " every MINUTES minutes."
+        ),
+    )
+    parser.add_argument(
+        "--encoding", "-e", default=locale.getpreferredencoding(False)
+    )
+    parser.add_argument("--output", "-o")
+    parser.add_argument("files", nargs="+", type=pathlib.Path)
+    args = parser.parse_args()
+    if args.debug:
+        log_level = _logging.DEBUG
+    elif args.verbose:
+        log_level = _logging.INFO
+    else:
+        log_level = None
+    if log_level is not None:
+        _logging.basicConfig(level=log_level)
+        logger.setLevel(log_level)
+    global_vals = ()
+    chapter_infos = []
+    for path in args.files:
+        logger.info("Reading metadata from %s", path)
+        # We're explicitly decoding rather than using the text=True
+        # feature of check_output because I have encountered metadata
+        # fields with values that use CRLF for line endings.  ffmpeg
+        # then seems to convert those to "\r\\\n".  Python universal
+        # newlines then converts that to \n\\\n, which breaks since
+        # now you have ended the previous field and started a new line
+        # that has just "\\" on it.
+        metadata_str = subprocess.check_output(
+            [args.ffmpeg, "-i", path, "-f", "ffmetadata", "-"],
+            stderr=subprocess.DEVNULL,
+        ).decode(args.encoding)
+        num_chapters = 0
+        try:
+            for section in parse_ffmetadata_sections(metadata_str):
+                if not section.startswith("["):
+                    if not global_vals:
+                        logger.info("Copying global metadata from %s", path)
+                        global_vals = list(
+                            parse_ffmetadata_key_value_pairs(section)
+                        )
+                    continue
+                header, body = re.split("\n", section, 1)
+                if header.strip() != "[CHAPTER]":
+                    raise Exception(
+                        "Unknown section %s in %s"
+                        % (section.split("\n", 1)[0], path)
+                    )
+                chapter = Chapter()
+                if args.number_titles:
+                    chapter.title = args.number_title_fmt % (
+                        len(chapter_infos) + 1,
+                    )
+                for key, value in parse_ffmetadata_key_value_pairs(body):
+                    if key == "TIMEBASE":
+                        chapter.time_base = parse_timebase(value)
+                    elif key == "START":
+                        chapter.start = int(value)
+                    elif key == "END":
+                        chapter.end = int(value)
+                    elif key == "title":
+                        if not args.number_titles:
+                            chapter.title = value
+                    else:
+                        raise Exception(
+                            f"Unknown chapter metadata: {key}={value}"
+                        )
+                if (
+                    chapter.start is None
+                    or chapter.end is None
+                    or chapter.title is None
+                ):
+                    raise Exception(f"Incomplete chapter data: {chapter}")
+                logger.debug("Finishing up chapter: %r", chapter)
+                if chapter.duration_secs >= args.min_chapter_len:
+                    chapter.change_time_base(args.time_base)
+                    chapter_infos.append((chapter.duration, chapter.title))
+                    num_chapters += 1
+                else:
+                    logger.warning(
+                        "Ignoring chapter which is only %d second(s) long: %s",
+                        chapter.duration_secs,
+                        chapter,
+                    )
+            if num_chapters == 0 and args.auto_chapters:
+                logger.info(
+                    "%s has no chapters, making chapter for whole file", path
+                )
+                stdout = subprocess.check_output(
+                    [
+                        "ffprobe",
+                        "-show_streams",
+                        "-select_streams",
+                        "a",
+                        "-i",
+                        path,
+                        "-of",
+                        "json",
+                    ],
+                    stderr=subprocess.DEVNULL,
+                ).decode(args.encoding)
+                streams = json.loads(stdout)["streams"]
+                file_duration = float(streams[0]["duration"])
+                if file_duration >= args.min_chapter_len:
+                    title = args.number_title_fmt % (len(chapter_infos) + 1,)
+                    chapter_infos.append(
+                        (int(file_duration / args.time_base), title)
+                    )
+        except Exception:
+            logger.fatal("Exception while processing %s", path)
+            raise
+
+    if args.auto_chapters and len(chapter_infos) <= 1:
+        assert len(chapter_infos) == 1, repr(chapter_infos)
+        assert len(args.files) == 1, repr(args.files)
+        duration = chapter_infos[0][0]
+        duration_secs = duration * args.time_base
+        max_chapter_len_secs = args.auto_chapter_len * 60
+        max_chapter_len = int(max_chapter_len_secs / args.time_base)
+        num_chapters = math.ceil(duration_secs / max_chapter_len_secs)
+        assert num_chapters > 0, repr(num_chapters)
+        logger.info("Making %d automatic chapter(s)", num_chapters)
+        chapter_infos = [
+            (max_chapter_len, args.number_title_fmt % (n + 1,))
+            for n in range(num_chapters - 1)
+        ]
+        chapter_infos.append(
+            (
+                duration - ((num_chapters - 1) * max_chapter_len),
+                args.number_title_fmt % (len(chapter_infos) + 1,),
+            )
+        )
+
+    if args.output:
+        output = open(args.output, "wt")
+    else:
+        output = sys.stdout
+    esc = escape_ffmetadata_value
+
+    output.write(FFMETADATA_MAGIC)
+
+    allowed_global_keys = set(args.allowed_global_keys)
+    for key, value in global_vals:
+        if key in allowed_global_keys:
+            output.write(f"{esc(key)}={esc(value)}\n")
+        else:
+            logger.debug("Filtered out global metadata: %s=%s", key, value)
+
+    start = 0
+    for duration, title in chapter_infos:
+        output.write(
+            "\n".join(
+                [
+                    "[CHAPTER]",
+                    f"TIMEBASE={args.time_base}",
+                    f"START={start}",
+                    f"END={start + duration}",
+                    f"title={esc(title)}",
+                    # This is here just to get a newline at the end.
+                    "",
+                ]
+            )
+        )
+        start += duration
+
+    if args.output:
+        output.close()
+
+
+if __name__ == "__main__":
+    main(sys.argv)

@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+# Combine audio book files into a single file, usually an M4B file.
+
+set -uo pipefail
+
+bitrate=
+clean_up=1
+dry_run=
+overwrite=0
+split_single_mp3=1
+input_files=()
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		--bitrate|-b)
+			[ $# -ge 2 ] || { echo "--bitrate needs an arg" >&2; exit 1; }
+			bitrate=$2
+			shift 2
+			;;
+
+		--no-clean|-N)
+			clean_up=0
+			shift 1
+			;;
+
+		--dry-run|-n)
+			dry_run="echo"
+			shift 1
+			;;
+
+		--overwrite|-y)
+			overwrite=1
+			shift 1
+			;;
+
+		--no-split-mp3|-S)
+			split_single_mp3=0
+			shift 1
+			;;
+
+		--)
+			shift 1
+			input_files+=("$@")
+			shift $#
+			;;
+
+		-*)
+			echo "Unknown option $1" >&2
+			exit 1
+			;;
+
+		*)
+			input_files+=("$1")
+			shift 1;
+	esac
+done
+
+if [ "${#input_files[@]}" -lt 2 ]; then
+	echo "Error: Need at least one input file and one output file" >&2
+	exit 1
+fi
+
+output_file=${input_files[-1]}
+unset "input_files[-1]"
+
+temp_dir=$(mktemp -d)
+if [ $clean_up -eq 1 ]; then
+	trap 'rm -rf "$temp_dir"' EXIT
+else
+	echo "Temp dir: $temp_dir"
+fi
+
+# I used to have copying chapters as an option, but if you don't copy
+# chapters then you get no metadata at all, which sucks.  If you do a
+# fancy trick like snatching the metadata from the first file, then
+# you seem very likely to end up with output that has chapters for the
+# duration of the first file, and none thereafter, which seems broken.
+# Now we just always force chapters.  If you don't have chapters,
+# that's probably OK, this will still keep metadata.
+#
+# Note that we scrape chapters from the source files before we
+# potentially split/transcode.  This ordering was chosen to scrape
+# chapters from the source file(s) before we potentially mp3splt and
+# lose chapter data.  However, I've found the chapter offsets can get
+# a bit broken through mp3splt and transcoding.  Not sure why or
+# exactly what I should do about it.
+chapter_file=$temp_dir/chapters
+abt_merge_chapters -N -o "$chapter_file" "${input_files[@]}" || exit 1
+
+transcode=0
+for input_file in "${input_files[@]}"; do
+	ext=${input_file##*.}
+	case "$ext" in
+		mp3)
+			transcode=1
+			break
+			;;
+
+		mp4|m4a|m4b|aac)
+			;;
+
+		*)
+			echo "Unknown extension on input file: $input_file" >&2
+			exit 1
+			;;
+	esac
+done
+
+if [ $transcode -eq 1 ]; then
+	# Note that, AFAIK, mp3splt actually splits more than just MP3s,
+	# hence no check for file type here.
+	if [[ ${#input_files[@]} -eq 1 && split_single_mp3 -eq 1 ]]; then
+		echo "Splitting single MP3 file for faster transcoding"
+		split_dir=$temp_dir/split
+		mkdir "$split_dir"
+		# shots=2 is apparently necessary because our silence parts
+		# are so close together.
+		# https://sourceforge.net/p/mp3splt/bugs/192/
+		#
+		# You could use error_if_no_aa here, but I've actually had
+		# that fail and then you're like ¯\_(ツ)_/¯ so instead we just
+		# warn_if_no_aa.
+		mp3splt -a -t 30.0 -p shots=2,warn_if_no_aa -f -d "$split_dir" \
+		        "${input_files[@]}" \
+			|| exit 1
+		input_files=("$split_dir"/*.mp3)
+	fi
+	transcode_dir=$temp_dir/transcode
+	mkdir "$transcode_dir" || exit 1
+	transcode_args=()
+	if [ -n "$bitrate" ]; then
+		transcode_args=(-b:a "$bitrate")
+	fi
+	if [ -z "$dry_run" ]; then
+		echo "Juffo-Wup fills in my fibers and I grow turgid." \
+		     " Parallel transcoding ensues."
+	fi
+	$dry_run parallel -q ffmpeg -i {} -c copy -c:a libfdk_aac \
+	         "${transcode_args[@]}" \
+	         "$transcode_dir/{= \$_ = sprintf('%04d', seq()) =}.m4b" \
+	         ::: "${input_files[@]}" \
+		|| exit 1
+	input_files=("$transcode_dir"/*.m4b)
+fi
+
+files_list=$temp_dir/files
+for file in "${input_files[@]}"; do
+	if [ -n "${file##*/*}" ]; then
+		file=$PWD/$file
+	fi
+	echo "file '$file'" >>"$files_list"
+	# I ran into M4B files where the accompanying metadata streams
+	# claimed a length longer than the audio stream.  This cuts the
+	# file off at the end of the (first and hopefully only) audio
+	# stream.
+	duration=$(ffprobe -show_streams -select_streams a:0 -sexagesimal \
+	                   -of json "$file" 2>/dev/null |
+		           jq -r .streams[0].duration)
+	echo "outpoint $duration" >>"$files_list"
+done
+
+# The fact that ffmpeg_input_args is currently unused, and
+# ffmpeg_output_args is barely used, is because they used to be used
+# more, but various bits that were using them have since been removed
+# or rewritten.  I leave them here since they may yet be useful in the
+# future.
+ffmpeg_input_args=()
+ffmpeg_output_args=()
+
+if [ $overwrite -eq 1 ]; then
+	ffmpeg_output_args+=(-y)
+fi
+
+$dry_run ffmpeg \
+         -thread_queue_size 1024 \
+         -f concat -safe 0 -i "$files_list" \
+         -i "$chapter_file" \
+         "${ffmpeg_input_args[@]}" \
+         -c copy \
+         -map 0:a \
+         -map_metadata 1 \
+         "${ffmpeg_output_args[@]}" \
+         "$output_file" \
+	|| exit 1
+
+cover_art_src=${input_files[0]}
+
+while IFS=$'\t' read -r index codec; do
+	case "$codec" in
+		mjpeg)
+			ext=jpg
+			;;
+
+		png|gif)
+			ext=$codec
+			;;
+
+		*)
+			echo "Skipping unknown video (cover art) codec: $codec" >&2
+			continue
+	esac
+	art_file=$temp_dir/art.$ext
+	$dry_run ffmpeg -i "$cover_art_src" -map 0:"$index" -y \
+	         "$art_file" </dev/null || exit 1
+	$dry_run mp4art --add "$art_file" "$output_file" || exit 1
+done < <(ffprobe -show_streams -select_streams v -i "$cover_art_src" \
+                 -of json 2>/dev/null \
+	         | jq -r '.streams[] | [.index, .codec_name] | @tsv')
