@@ -117,8 +117,6 @@ tap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(event)
 end)
 tap:start()
 
-hs.loadSpoon("ControlEscape"):start()
-
 HS_LUA_ROOT = os.getenv("HOME") .. "/.hammerspoon/lua"
 
 -- I don't have a /usr/local/share/lua.  (Maybe I would if I used
