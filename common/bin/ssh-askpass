@@ -14,7 +14,7 @@ def main(argv):
         "-p",
         help="Path to pinentry",
         default=(
-            "/usr/local/MacGPG2/libexec/pinentry-mac.app"
+            "/Applications/MacPorts/pinentry-mac.app"
             "/Contents/MacOS/pinentry-mac"
         ),
     )
