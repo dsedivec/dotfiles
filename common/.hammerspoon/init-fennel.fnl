@@ -127,6 +127,20 @@
                                           (: hotkey method))))))
 
 
+;;; Jeejah REPL
+
+;; (set package.path (.. package.path ";" HS_LUA_ROOT "/src/jeejah/?.lua"))
+;; (local jeejah (require "jeejah"))
+;; (global jeejah-coro (jeejah.start))
+;; (global jeejah-coro-freq 0.01)
+;; (fn jeejah-spin []
+;;   (coroutine.resume jeejah-coro)
+;;   (when (not= (coroutine.status jeejah-coro)
+;;               "dead")
+;;     (hs.timer.doAfter jeejah-coro-freq jeejah-spin)))
+;; (global jeejah-timer (hs.timer.doAfter jeejah-coro-freq jeejah-spin))
+
+
 {: my-dark-mode-hook
  :adm auto-dark-mode
  :send-keys my-send-keys
