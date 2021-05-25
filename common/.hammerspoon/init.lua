@@ -1,4 +1,3 @@
-
 hs.hotkey.bind('alt-ctrl', '`', hs.toggleConsole)
 
 PLAYER_EVENTS = {PLAY = true; FAST = true; REWIND = true}
