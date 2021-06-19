@@ -6,22 +6,26 @@
 ######################################################################
 ### Loading up other people's ideas of what should be in my bashrc.
 
-# Use bash_completion.  I think this was stolen from Ubuntu's
-# /etc/skel/.bashrc.
+# Use bash_completion.  I think this was born from Ubuntu's
+# /etc/skel/.bashrc, which (I guess) suggested /etc/bash_completion as
+# the thing to source.
 #
-# MacPorts has bash_completion in /opt/local/etc.
+# MacPorts has bash_completion in /opt/local/etc.  Homebrew has
+# /usr/local/etc/profile.d/bash_completion.sh.
 #
 # Fedora sources bash_completion for us, and something bad happens
 # when you re-source it, so we avoid that.
-if [ -z "$BASH_COMPLETION" ] || [ ! -r "$BASH_COMPLETION" ]; then
-	for dir in /etc /opt/local/etc; do
-		script=$dir/bash_completion
+if [[ -z "$BASH_COMPLETION" || ! -r "$BASH_COMPLETION" ]]; then
+	for script in /etc/bash_completion \
+	              /opt/local/etc/bash_completion \
+	              /usr/local/etc/profile.d/bash_completion.sh
+	do
 		if [ -r "$script" ]; then
 			. "$script"
 			break
 		fi
 	done
-	unset dir script
+	unset script
 fi
 
 # Source global definitions.  Note that Debian/Ubuntu may have
@@ -68,12 +72,16 @@ fi
 #
 # MacPorts
 PATH=/opt/local/bin:/opt/local/sbin:$PATH
-# Homebrew, in my special location
+# Homebrew, in my special location (/usr/local, the normal Homebrew
+# prefix, will be put in PATH below, and not just for Homebrew)
 PATH=$HOME/.brew/bin:$PATH
-# Local directories, for OpenBSD ports.
+# Local directories, for OpenBSD ports and Homebrew.
 PATH=/usr/local/bin:/usr/local/sbin:$PATH
 # The various places ccache might get installed.
-PATH=$HOME/ccache-bin:/usr/$LIB/ccache:/opt/local/libexec/ccache:$PATH
+PATH=/usr/local/opt/ccache/libexec:$PATH
+PATH=/opt/local/libexec/ccache:$PATH
+PATH=/usr/$LIB/ccache:$PATH
+PATH=$HOME/ccache-bin:$PATH
 # rbenv.  We add its shims directory ourselves, because if we don't,
 # subsequent invocations of the shell will find the shims directory
 # pushed to the end of the PATH, and then rbenv won't try and put it
