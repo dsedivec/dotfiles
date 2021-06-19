@@ -49,58 +49,47 @@
 	# s = --stat
 	#
 	# Objects:
-	# m = master
-	# om = origin/master
-	# lom = last merge with origin/master
+	# m = main
+	# om = origin/HEAD (should be main or master)
+	# lom = last merge with origin/HEAD
 	# u = upstream
-	# p = parent branch (concept at my employer)
-	# op = parent branch from origin
+	#
+	# If upstream main branch is called master, do:
+	#
+	#     git symbolic-ref refs/heads/main ref/heads/master
 
-	pom = pull origin master
 	pff = pull --ff-only
 
-	mm = merge master
-	mom = merge origin/master
+	mm = merge main
+	mom = merge refs/remotes/origin/HEAD
 	mff = merge --ff-only
 	mc = merge --no-ff --no-edit
-	mp = !p=$(git parent-branch) && git merge "$p"
-	mop = !p=$(git parent-branch) && git merge origin/"$p"
 
-	dm = diff master
-	dom = diff origin/master
-	dlom = diff origin/master...
+	dm = diff main
+	dom = diff refs/remotes/origin/HEAD
+	dlom = diff refs/remotes/origin/HEAD...
 	du = diff @{upstream}
-	dp = !p=$(git parent-branch) && git diff "$p"
-	dop = !p=$(git parent-branch) && git diff origin/"$p"
 
 	ds = diff --stat
-	dsm = diff --stat master
-	dsom = diff --stat origin/master
-	dslom = diff --stat origin/master...
+	dsm = diff --stat main
+	dsom = diff --stat refs/remotes/origin/HEAD
+	dslom = diff --stat refs/remotes/origin/HEAD...
 	dsu = diff --stat @{upstream}
-	dsp = !p=$(git parent-branch) && git ds "$p"
-	dsop = !p=$(git parent-branch) && git ds origin/"$p"
 
 	dt = difftool
-	dtm = difftool master
-	dtom = difftool origin/master
-	dtlom = difftool origin/master...
+	dtm = difftool main
+	dtom = difftool refs/remotes/origin/HEAD
+	dtlom = difftool refs/remotes/origin/HEAD...
 	dtu = difftool @{upstream}
-	dtp = !p=$(git parent-branch) && git dt "$p"
-	dtop = !p=$(git parent-branch) && git dt origin/"$p"
 
-	lm = log ^master HEAD
-	lom = log ^origin/master HEAD
+	lm = log ^main HEAD
+	lom = log ^refs/remotes/origin/HEAD HEAD
 	lu = log ^@{upstream} HEAD
-	lp = !p=$(git parent-branch) && git log ^"$p" HEAD
-	lop = !p=$(git parent-branch) && git log ^origin/"$p" HEAD
 
 	ls = log --stat
-	lsm = log --stat ^master HEAD
-	lsom = log --stat ^origin/master HEAD
+	lsm = log --stat ^main HEAD
+	lsom = log --stat ^refs/remotes/origin/HEAD HEAD
 	lsu = log --stat ^@{upstream} HEAD
-	lsp = !p=$(git parent-branch) && git ls ^"$p" HEAD
-	lsop = !p=$(git parent-branch) && git ls ^origin/"$p" HEAD
 
 [rebase]
 	autosquash = 1
