@@ -13,9 +13,6 @@
 #
 # Fedora sources bash_completion for us, and something bad happens
 # when you re-source it, so we avoid that.
-#
-# This is loaded before the SSC developer's .bashrc (below) so it can
-# pick up that we have the Git completion stuff.
 if [ -z "$BASH_COMPLETION" ] || [ ! -r "$BASH_COMPLETION" ]; then
 	for dir in /etc /opt/local/etc; do
 		script=$dir/bash_completion
@@ -26,17 +23,6 @@ if [ -z "$BASH_COMPLETION" ] || [ ! -r "$BASH_COMPLETION" ]; then
 	done
 	unset dir script
 fi
-
-# SSC bashrc.  This is probably purposely above almost everything else
-# so that I can override any of its settings that I don't care for.
-ssc_bashrc=~/git/system/dotfiles/developer-bashrc
-[ -r "$ssc_bashrc" ] && . "$ssc_bashrc"
-unset ssc_bashrc
-# That loaded a lot of aliases that I don't need, let's just clear out
-# aliases entirely.
-unalias -a
-# Our Java 1.4 really screws with my Clojure development
-unset JAVA_HOME
 
 # Source global definitions.  Note that Debian/Ubuntu may have
 # /etc/bash.bashrc, but if they do then their version of Bash is
@@ -65,11 +51,6 @@ is_available () {
 ######################################################################
 ### PATH
 
-# Some SSC scripts use this I _think_.  I also use it here building up
-# my PATH.
-POSTGRESQL=$HOME/pgsql
-export POSTGRESQL
-
 # Note use of && here to short-circuit calling uname -i when the
 # directories aren't found, which is useful on OS X where uname -i
 # creates an error (and where neither of the lib64 directories exist).
@@ -89,10 +70,8 @@ fi
 PATH=/opt/local/bin:/opt/local/sbin:$PATH
 # Homebrew, in my special location
 PATH=$HOME/.brew/bin:$PATH
-# Local directories, for OpenBSD ports and SSC /usr/local/bin/python.
+# Local directories, for OpenBSD ports.
 PATH=/usr/local/bin:/usr/local/sbin:$PATH
-# SSC PostgreSQL install.
-PATH=$POSTGRESQL/bin:$PATH
 # The various places ccache might get installed.
 PATH=$HOME/ccache-bin:/usr/$LIB/ccache:/opt/local/libexec/ccache:$PATH
 # rbenv.  We add its shims directory ourselves, because if we don't,
