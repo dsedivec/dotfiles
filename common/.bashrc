@@ -644,22 +644,23 @@ unset real_cd
 # unless/until you actually try to run "fzf ...", at which point the
 # completion script gets loaded.  Instead, we will always immediately
 # load fzf's Bash completion script.
-
-fzf_file_names=(completion.bash key-bindings.bash)
-fzf_shell_dir=
-if [ -n "$PS1" ]; then
-	for dir in /opt/local/share/fzf/shell /usr/local/opt/fzf/shell; do
-		for script in "${fzf_file_names[@]}"; do
-			if [ ! -f "$dir/$script" ]; then
-				continue 2
-			fi
-		done
-		fzf_shell_dir=$dir
-		break
-	done
+#
+# Naturally, MacPorts and Homebrew drop the files for fzf in totally
+# different places, so we have to support both.
+fzf_scripts=()
+if [ -n "${PS1:-}" ]; then
+	if [ -r /opt/local/share/fzf/shell/key-bindings.bash ]; then
+		# MacPorts
+		fzf_scripts=(/opt/local/share/bash-completion/completions/fzf
+		             /opt/local/share/fzf/shell/key-bindings.bash)
+	elif [ -r /usr/local/opt/fzf/shell ]; then
+		# Homebrew
+		fzf_scripts=(/usr/local/opt/fzf/shell/{completion,key-bindings}.bash)
+	else
+		fzf_scripts=()
+	fi
 fi
-unset dir script
-if [[ -n "$fzf_shell_dir" ]]; then
+if (( ${#fzf_scripts[@]} )); then
 	# Here is a generic wrapper around an existing completion function
 	# to choose from its resulting candidates with fzf.  See below
 	# usage as with Git.
@@ -758,9 +759,10 @@ if [[ -n "$fzf_shell_dir" ]]; then
 	__fzf_wrap_existing_completion git
 	__fzf_wrap_existing_completion gitk
 
-	for script in "${fzf_file_names[@]}"; do
-		source "$fzf_shell_dir/$script"
+	for script in "${fzf_scripts[@]}"; do
+		source "$script"
 	done
+	unset script fzf_scripts
 
 	# This is the normal way to add fzf completion to a command in
 	# Bash, per fzf's docs.  Without this, "**" will not trigger fzf
@@ -805,8 +807,6 @@ if [[ -n "$fzf_shell_dir" ]]; then
 
 	complete -I -F _fzf_complete_initial_word -o default -o bashdefault
 fi
-unset dir script fzf_shell_dir fzf_file_names
-
 
 ######################################################################
 ### Other cute commands
