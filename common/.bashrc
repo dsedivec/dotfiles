@@ -749,7 +749,7 @@ if (( ${#fzf_scripts[@]} )); then
 	# to do this hacky stuff.
 	if type _completion_loader &> /dev/null; then
 		regexp='__git_wrap__git'
-		if [[ ! $(complete -p git) =~ $regexp ]]; then
+		if [[ ! $(complete -p git 2>/dev/null) =~ $regexp ]]; then
 			# Force immediate loading of Git completion functions, so
 			# __fzf_wrap_existing_completion can wrap them.
 			_completion_loader git
