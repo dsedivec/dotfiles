@@ -638,53 +638,28 @@ unset real_cd
 ######################################################################
 ### fzf
 
-fzf_bindings=/opt/local/share/fzf/shell/key-bindings.bash
-if [[ -n "$PS1" && -f "$fzf_bindings" ]] && type _completion_loader &>/dev/null
-then
-	# MacPorts drops fzf's Bash completion setup into the
-	# bash-completion load-on-demand directory, but I don't think
-	# that's right: when installed this way I think the script never
-	# gets executed unless/until you actually try to run "fzf ...", at
-	# which point the completion script gets loaded.
-	#
-	# Instead, load it right now.
-	_completion_loader fzf
+# MacPorts drops fzf's Bash completion setup into the bash-completion
+# load-on-demand directory, but I don't think that's right: when
+# installed this way I think the script never gets executed
+# unless/until you actually try to run "fzf ...", at which point the
+# completion script gets loaded.  Instead, we will always immediately
+# load fzf's Bash completion script.
 
-	source "$fzf_bindings"
-
-	# Put back my C-t, move FZF to M-i instead.  Emacs user checking in.
-	bind '"\C-t": transpose-chars'
-	# (This actually breaks in Bash < v4.)
-	bind -m emacs-standard -x '"\ei": fzf-file-widget'
-
-	FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --bind alt-p:toggle-preview"
-	export FZF_DEFAULT_OPTS
-	FZF_COMPLETION_TRIGGER='xx'
-	FZF_CTRL_R_OPTS="${FZF_CTRL_R_OPTS:-} --preview='echo {}' --preview-window=up:3:wrap"
-
-	if command -v fd >/dev/null; then
-		# fd is much faster than find.
-		FZF_DEFAULT_COMMAND='fd -HI --type file --color=always'
-		FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --ansi"
-		FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
-	fi
-
-	# Complete all commands with "**"?  I don't know why this isn't
-	# the default for Bash.  Thinking complete -D might be too new?
-	# Or else this is going to break horribly in ways I can't predict.
-	complete -D -F _fzf_path_completion -o default -o bashdefault
-
-	# Enable fzf completion with the first word on the line.  Need to
-	# use our own function to change $1 from "_InitialWorD_" (magic
-	# value in Bash, I *think*) to "", in order to avoid recursion
-	# between fzf's functions and bash-completions' functions.
-	_fzf_complete_initial_word () {
-		shift 1
-		_fzf_path_completion "" "$@"
-	}
-
-	complete -I -F _fzf_complete_initial_word -o default -o bashdefault
-
+fzf_file_names=(completion.bash key-bindings.bash)
+fzf_shell_dir=
+if [ -n "$PS1" ]; then
+	for dir in /opt/local/share/fzf/shell /usr/local/opt/fzf/shell; do
+		for script in "${fzf_file_names[@]}"; do
+			if [ ! -f "$dir/$script" ]; then
+				continue 2
+			fi
+		done
+		fzf_shell_dir=$dir
+		break
+	done
+fi
+unset dir script
+if [[ -n "$fzf_shell_dir" ]]; then
 	# Here is a generic wrapper around an existing completion function
 	# to choose from its resulting candidates with fzf.  See below
 	# usage as with Git.
@@ -761,12 +736,31 @@ then
 		"${complete_cmd[@]}"
 	}
 
-	# Force immediate loading of Git completion functions, so
-	# __fzf_wrap_existing_completion can wrap them.
-	_completion_loader git
+	# MacPorts requires me to load the Git completions with
+	# _completion_loader.  Homebrew loads them up front, but
+	# _completion_loader still exists.  Furthermore, MacPorts wants
+	# you to load completions out of "git" but Homebrew has them in
+	# "git-completion".  _completion_loader will, in fact, *clobber an
+	# existing completion* for X if you try "_completion_loader X"
+	# without having a
+	# /usr/local/share/bash-completion/completions/X.bash.  So we have
+	# to do this hacky stuff.
+	if type _completion_loader &> /dev/null; then
+		regexp='__git_wrap__git'
+		if [[ ! $(complete -p git) =~ $regexp ]]; then
+			# Force immediate loading of Git completion functions, so
+			# __fzf_wrap_existing_completion can wrap them.
+			_completion_loader git
+		fi
+		unset regexp
+	fi
 
 	__fzf_wrap_existing_completion git
 	__fzf_wrap_existing_completion gitk
+
+	for script in "${fzf_file_names[@]}"; do
+		source "$fzf_shell_dir/$script"
+	done
 
 	# This is the normal way to add fzf completion to a command in
 	# Bash, per fzf's docs.  Without this, "**" will not trigger fzf
@@ -777,8 +771,41 @@ then
 	# -o bashdefault apparently doesn't mean "call the default
 	# completion function if this one fails", much to my surprise.)
 	_fzf_setup_completion path git
+
+	# Put back my C-t, move FZF to M-i instead.  Emacs user checking in.
+	bind '"\C-t": transpose-chars'
+	# (This actually breaks in Bash < v4.)
+	bind -m emacs-standard -x '"\ei": fzf-file-widget'
+
+	FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --bind alt-p:toggle-preview --bind ctrl-k:kill-line"
+	export FZF_DEFAULT_OPTS
+	FZF_COMPLETION_TRIGGER='xx'
+	FZF_CTRL_R_OPTS="${FZF_CTRL_R_OPTS:-} --preview='echo {}' --preview-window=up:3:wrap"
+
+	if command -v fd >/dev/null; then
+		# fd might be faster than find.
+		FZF_DEFAULT_COMMAND='fd -HI --type file --color=always'
+		FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --ansi"
+		FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+	fi
+
+	# Complete all commands with "**"?  I don't know why this isn't
+	# the default for Bash.  Thinking complete -D might be too new?
+	# Or else this is going to break horribly in ways I can't predict.
+	complete -D -F _fzf_path_completion -o default -o bashdefault
+
+	# Enable fzf completion with the first word on the line.  Need to
+	# use our own function to change $1 from "_InitialWorD_" (magic
+	# value in Bash, I *think*) to "", in order to avoid recursion
+	# between fzf's functions and bash-completions' functions.
+	_fzf_complete_initial_word () {
+		shift 1
+		_fzf_path_completion "" "$@"
+	}
+
+	complete -I -F _fzf_complete_initial_word -o default -o bashdefault
 fi
-unset fzf_bindings
+unset dir script fzf_shell_dir fzf_file_names
 
 
 ######################################################################
