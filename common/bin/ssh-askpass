@@ -13,10 +13,7 @@ def main(argv):
         "--pinentry",
         "-p",
         help="Path to pinentry",
-        default=(
-            "/Applications/MacPorts/pinentry-mac.app"
-            "/Contents/MacOS/pinentry-mac"
-        ),
+        default=("pinentry-mac"),
     )
     parser.add_argument(
         "prompt", nargs="?", default="Enter your OpenSSH passphrase:"
