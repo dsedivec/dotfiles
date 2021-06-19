@@ -961,6 +961,10 @@ if [[ "$PS1" ]]; then
 	fi
 fi
 
+if command -v direnv &>/dev/null; then
+	eval "$(direnv hook bash)"
+fi
+
 
 ######################################################################
 ### Cleanup
