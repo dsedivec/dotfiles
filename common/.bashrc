@@ -784,7 +784,7 @@ if [[ -n "$fzf_shell_dir" ]]; then
 
 	if command -v fd >/dev/null; then
 		# fd might be faster than find.
-		FZF_DEFAULT_COMMAND='fd -HI --type file --color=always'
+		FZF_DEFAULT_COMMAND='fd -HI --color=always'
 		FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --ansi"
 		FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 	fi
