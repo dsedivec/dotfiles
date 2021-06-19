@@ -182,6 +182,7 @@ for dir in ${MANPATH:-}; do
 		break
 	fi
 done
+unset dir
 set +f
 IFS=$saved_IFS
 if [ $found_blank_MANPATH -eq 0 ]; then
