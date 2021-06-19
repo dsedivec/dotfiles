@@ -127,6 +127,155 @@
                                           (: hotkey method))))))
 
 
+;;; Moom replacements
+
+(global moom-modal (hs.hotkey.modal.new "alt" "escape"))
+(global moom-modal-alert nil)
+(global moom-modal-saved-frames {})
+
+(fn moom-modal-window-key [win]
+  (.. (or (-?> (win:application) (: :pid)) "nil app")
+      "|"
+      (or (win:id) "nil win")))
+
+(fn moom-modal-save-frame [?win ?key ?frame]
+  (let [win (or ?win (hs.window.frontmostWindow))
+        key (or ?key (moom-modal-window-key win))
+        frame (or ?frame (win:frame))]
+    (tset moom-modal-saved-frames key (hs.geometry.copy frame))))
+
+(fn moom-modal-maybe-save-frame [?win ?frame]
+  (let [win (or ?win (hs.window.frontmostWindow))
+        key (moom-modal-window-key win)]
+    (when (not (. moom-modal-saved-frames key))
+      (moom-modal-save-frame win key ?frame))))
+
+(fn moom-modal-restore-frame [?win]
+  (let [win (or ?win (hs.window.frontmostWindow))
+        key (moom-modal-window-key win)
+        frame (. moom-modal-saved-frames key)]
+    (when frame
+      (tset moom-modal-saved-frames key nil)
+      (win:setFrame frame 0))))
+
+(fn moom-modal-clear-alert []
+  (when moom-modal-alert
+    (hs.alert.closeSpecific moom-modal-alert)
+    (global moom-modal-alert nil)))
+
+(fn moom-modal-show-alert [msg]
+  (moom-modal-clear-alert)
+  (global moom-modal-alert
+          (hs.alert.show msg
+                         {:fadeInDuration 0
+                          :padding 75
+                          :fillColor {:white 0 :alpha 0.5}}
+                         "indefinite")))
+
+(fn moom-modal.entered []
+  (moom-modal-show-alert "Moom"))
+
+(fn moom-modal.exited []
+  (moom-modal-clear-alert))
+
+(fn moom-window-center []
+  (: (hs.window.frontmostWindow) :centerOnScreen nil true 0))
+
+(fn moom-window-grow [axis]
+  (let [win (hs.window.frontmostWindow)
+        win-frame (win:frame)
+        screen-frame (: (win:screen) :frame)
+        axis2 (if (= axis :x) :x2 :y2)]
+    (moom-modal-maybe-save-frame win win-frame)
+    (tset win-frame axis (. screen-frame axis))
+    (tset win-frame axis2 (. screen-frame axis2))
+    (win:setFrameInScreenBounds win-frame 0)))
+
+(fn moom-window-to-left-side []
+  (let [win (hs.window.frontmostWindow)
+        frame (win:frame)]
+    (moom-modal-maybe-save-frame win frame)
+    (tset frame :x 0)
+    (win:setFrameInScreenBounds frame 0)))
+
+(fn moom-window-to-right-side []
+  (let [win (hs.window.frontmostWindow)
+        frame (win:frame)]
+    (moom-modal-maybe-save-frame win frame)
+    (tset frame :x (- (. (: (win:screen) :frame) :x2) (. frame :w)))
+    (win:setFrameInScreenBounds frame 0)))
+
+(fn moom-window-to-top-side []
+  (let [win (hs.window.frontmostWindow)
+        frame (win:frame)]
+    (moom-modal-maybe-save-frame win frame)
+    (tset frame :y (. (: (win:screen) :frame) :y))
+    (win:setFrameInScreenBounds frame 0)))
+
+(fn moom-window-to-bottom-side []
+  (let [win (hs.window.frontmostWindow)
+        frame (win:frame)]
+    (moom-modal-maybe-save-frame win frame)
+    (tset frame :y (- (. (: (win:screen) :frame) :y2) (. frame :h)))
+    (win:setFrameInScreenBounds frame 0)))
+
+(fn moom-window-move [axis amount]
+  (let [win (hs.window.frontmostWindow)
+        frame (win:frame)]
+    (tset frame axis (+ (. frame axis) amount))
+    (win:setFrame frame 0)))
+
+(fn moom-window-resize [dimension amount]
+  (let [win (hs.window.frontmostWindow)
+        frame (win:frame)]
+    (tset frame dimension (+ (. frame dimension) amount))
+    (win:setFrame frame 0)))
+
+(fn moom-window-set-unit-frame [unit-rect]
+  (let [win (hs.window.frontmostWindow)]
+    (moom-modal-maybe-save-frame win)
+    (: win :move unit-rect nil true 0)))
+
+(fn moom-window-maximize [?win]
+  (let [ax-win (hs.axuielement.windowElement
+                (or ?win (hs.window.frontmostWindow)))]
+    (ax-win:elementSearch (fn [_msg [ax-button & _]]
+                            (when ax-button
+                              (ax-button:performAction "AXZoomWindow")))
+                          (hs.axuielement.searchCriteriaFunction
+                           {:attribute "AXSubrole" :value "AXFullScreenButton"})
+                          {:count 1})))
+
+(moom-modal:bind "" "escape" (fn [] (moom-modal:exit)))
+(moom-modal:bind "alt" "escape" (fn [] (moom-modal:exit)))
+(moom-modal:bind "" "return" (fn [] (moom-modal:exit)))
+(moom-modal:bind "" "tab" moom-window-center)
+(moom-modal:bind "" "g" #(moom-window-grow :y))
+(moom-modal:bind "shift" "g" #(moom-window-grow :x))
+(moom-modal:bind "" "[" moom-window-to-left-side)
+(moom-modal:bind "" "]" moom-window-to-right-side)
+(moom-modal:bind ""  "u" moom-window-to-top-side)
+(moom-modal:bind ""  "d" moom-window-to-bottom-side)
+(moom-modal:bind "shift" "[" #(moom-window-set-unit-frame "[0, 0, 50, 100]"))
+(moom-modal:bind "shift" "]" #(moom-window-set-unit-frame "[50, 0, 100, 100]"))
+(moom-modal:bind "shift" "u" #(moom-window-set-unit-frame "[0, 0, 100, 50]"))
+(moom-modal:bind "shift" "d" #(moom-window-set-unit-frame "[0, 50, 100, 100]"))
+(each [_ dir (ipairs [["up" :y -1]
+                      ["down" :y 1]
+                      ["left" :x -1]
+                      ["right" :x 1]])]
+  (let [[key axis amount] dir
+        dimension (if (= axis :x) :w :h)
+        move-fn #(moom-window-move axis (* amount 100))
+        resize-fn #(moom-window-resize dimension (* amount 100))]
+    (moom-modal:bind [] key move-fn nil move-fn)
+    (moom-modal:bind ["shift"] key resize-fn nil resize-fn)))
+(moom-modal:bind "" "r" moom-modal-restore-frame)
+(moom-modal:bind "" "s" moom-modal-save-frame)
+
+(hs.hotkey.bind ["alt"] "=" moom-window-maximize)
+
+
 ;;; Jeejah REPL
 
 ;; (set package.path (.. package.path ";" HS_LUA_ROOT "/src/jeejah/?.lua"))
