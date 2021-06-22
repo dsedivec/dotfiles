@@ -23,7 +23,10 @@ if command -v diff-highlight >/dev/null 2>&1; then
 	exec diff-highlight || die "$my_name: failed to exec diff-highlight"
 fi
 
-for contrib_dir in /opt/local/share/git/contrib/diff-highlight; do
+for contrib_dir in \
+	/opt/local/share/git/contrib/diff-highlight \
+	/usr/local/share/git-core/contrib/diff-highlight
+do
 	diff_highlight="$contrib_dir/diff-highlight"
 	if [[ -x "$diff_highlight" ]]; then
 		exec "$diff_highlight" || die "$my_name: failed to exec $diff_highlight"
