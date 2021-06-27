@@ -69,6 +69,10 @@
 	dom = diff refs/remotes/origin/HEAD
 	dlom = diff refs/remotes/origin/HEAD...
 	du = diff @{upstream}
+	# Extra one, for when upstream is ahead and you want to see
+	# what they've changed.  (I usually use "git du" when I want
+	# to see what I'm about to push.)
+	dur = diff ...@{upstream}
 
 	ds = diff --stat
 	dsm = diff --stat main
