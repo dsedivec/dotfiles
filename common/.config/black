@@ -1,0 +1,4 @@
+# -*- mode: conf-toml; -*-
+
+[tool.black]
+line-length = 80
