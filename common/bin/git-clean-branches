@@ -1,0 +1,160 @@
+#!/usr/bin/python3
+
+import argparse
+import logging as _logging
+import subprocess
+import sys
+
+
+logger = _logging.getLogger(__name__)
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(prog=argv[0])
+    parser.set_defaults(dry_run=None)
+    mode_parser = parser.add_mutually_exclusive_group()
+    mode_parser.add_argument(
+        "--dry-run", "-n", dest="dry_run", action="store_true"
+    )
+    mode_parser.add_argument(
+        "--force", "-f", dest="dry_run", action="store_false"
+    )
+    parser.add_argument(
+        "--keep-branch",
+        "-k",
+        dest="keep_branches",
+        default=[],
+        action="append",
+        metavar="BRANCH_NAME",
+    )
+    parser.add_argument(
+        "--no-default-branches",
+        "-K",
+        dest="keep_default_branches",
+        default=True,
+        action="store_false",
+        help="Disable defaults: -k master -k main -k <current branch name>",
+    )
+    parser.add_argument(
+        "--in-default-branch",
+        "-M",
+        dest="merged_in_default_branches",
+        default=False,
+        action="store_true",
+        help="""\
+            Also delete branches merged into any branch named "master"
+            or "main"
+        """,
+    )
+    parser.add_argument(
+        "--in-branch",
+        "-m",
+        dest="merged_in_branches",
+        default=[],
+        action="append",
+        metavar="BRANCH_NAME",
+        help="Also delete branches contained by BRANCH_NAME",
+    )
+    parser.add_argument("--debug", "-d", action="store_true")
+    args = parser.parse_args(argv[1:])
+    if args.debug:
+        _logging.basicConfig(level=_logging.DEBUG)
+    if args.dry_run is None:
+        raise Exception("Must supply either --dry-run/-n or --force/-f")
+    keep_branches = set(args.keep_branches)
+    if args.keep_default_branches:
+        keep_branches.update(("master", "main"))
+        proc = subprocess.run(
+            # --quiet to suppress error when there's no ref that
+            # matches HEAD, such as in a detached HEAD situation.
+            ["git", "symbolic-ref", "--quiet", "--short", "HEAD"],
+            stdout=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0:
+            keep_branches.add(proc.stdout.strip())
+    merged_in_branches = set(args.merged_in_branches)
+    if args.merged_in_default_branches:
+        for branch in ("master", "main"):
+            if (
+                subprocess.call(
+                    ["git", "rev-parse", "--quiet", "--verify", branch],
+                    stdout=subprocess.DEVNULL,
+                )
+                == 0
+            ):
+                merged_in_branches.add(branch)
+    keep_branches.update(merged_in_branches)
+    branches_to_delete = set()
+    for line in subprocess.check_output(
+        [
+            "git",
+            "for-each-ref",
+            (
+                "--format="
+                "%(refname:short)%09%(upstream:remotename)%09%(upstream:short)"
+            ),
+            "refs/heads/**",
+        ],
+        text=True,
+    ).splitlines():
+        try:
+            local_branch, remote_name, remote_branch = line.split("\t", 2)
+        except Exception:
+            logger.exception("Error splitting %r", line)
+            raise
+        if (
+            local_branch in keep_branches
+            # remote_name of "." apparently means "remote is this very
+            # repo".  We don't delete branches with an upstream of the
+            # current repo.
+            or remote_name == "."
+            or not remote_branch
+        ):
+            continue
+        merge_base_cmd = [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            local_branch,
+            remote_branch,
+        ]
+        proc = subprocess.run(merge_base_cmd, check=False)
+        if proc.returncode == 0:
+            logger.debug("Branch %r is merged in remote", local_branch)
+            branches_to_delete.add(local_branch)
+        elif proc.returncode != 1:
+            proc.check_returncode()
+    for branch in merged_in_branches:
+        logger.debug("Looking for branches merged into %r", branch)
+        merged_branches = subprocess.check_output(
+            [
+                "git",
+                "for-each-ref",
+                f"--merged={branch}",
+                "--format=%(refname:short)",
+                "refs/heads/**",
+            ],
+            text=True,
+        ).splitlines()
+        for merged_branch in merged_branches:
+            if merged_branch not in keep_branches:
+                logger.debug(
+                    "Branch %r is merged into %r", merged_branch, branch
+                )
+                branches_to_delete.add(merged_branch)
+    branches_to_delete = sorted(branches_to_delete)
+    if args.dry_run:
+        for branch in branches_to_delete:
+            print(branch)
+    else:
+        # --quiet because otherwise you (potentially) get spammy
+        # warnings about how the branch hasn't been merged to HEAD.
+        subprocess.check_call(
+            ["git", "branch", "--quiet", "-d", *branches_to_delete]
+        )
+
+
+if __name__ == "__main__":
+    main(sys.argv)
