@@ -91,41 +91,46 @@ def main(argv):
         [
             "git",
             "for-each-ref",
-            (
-                "--format="
-                "%(refname:short)%09%(upstream:remotename)%09%(upstream:short)"
-            ),
+            ("--format=" "%(refname:short)%09%(upstream)"),
             "refs/heads/**",
         ],
         text=True,
     ).splitlines():
         try:
-            local_branch, remote_name, remote_branch = line.split("\t", 2)
+            local_branch, upstream_branch = line.split("\t", 1)
         except Exception:
             logger.exception("Error splitting %r", line)
             raise
-        if (
-            local_branch in keep_branches
-            # remote_name of "." apparently means "remote is this very
-            # repo".  We don't delete branches with an upstream of the
-            # current repo.
-            or remote_name == "."
-            or not remote_branch
-        ):
+        if not upstream_branch or local_branch in keep_branches:
             continue
-        merge_base_cmd = [
-            "git",
-            "merge-base",
-            "--is-ancestor",
-            local_branch,
-            remote_branch,
-        ]
-        proc = subprocess.run(merge_base_cmd, check=False)
-        if proc.returncode == 0:
-            logger.debug("Branch %r is merged in remote", local_branch)
-            branches_to_delete.add(local_branch)
-        elif proc.returncode != 1:
-            proc.check_returncode()
+        if (
+            subprocess.run(
+                ["git", "show-ref", "--verify", "--quiet", upstream_branch],
+                check=False,
+            ).returncode
+            == 0
+        ):
+            proc = subprocess.run(
+                [
+                    "git",
+                    "merge-base",
+                    "--is-ancestor",
+                    local_branch,
+                    upstream_branch,
+                ],
+                check=False,
+            )
+            if proc.returncode == 0:
+                logger.debug("Branch %r is merged in remote", local_branch)
+                branches_to_delete.add(local_branch)
+            elif proc.returncode != 1:
+                proc.check_returncode()
+        else:
+            logger.warning(
+                "Branch %r is missing its upstream %r",
+                local_branch,
+                upstream_branch,
+            )
     for branch in merged_in_branches:
         logger.debug("Looking for branches merged into %r", branch)
         merged_branches = subprocess.check_output(
