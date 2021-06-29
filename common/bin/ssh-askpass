@@ -2,6 +2,7 @@
 # -*- coding: utf-8; -*-
 
 import argparse
+import logging
 import subprocess
 import sys
 import urllib
@@ -15,10 +16,13 @@ def main(argv):
         help="Path to pinentry",
         default=("pinentry-mac"),
     )
+    parser.add_argument("--debug", "-d", action="store_true", default=False)
     parser.add_argument(
         "prompt", nargs="?", default="Enter your OpenSSH passphrase:"
     )
     args = parser.parse_args(argv[1:])
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+    logging.debug("Starting %s", args.pinentry)
     pinentry = subprocess.Popen(
         [args.pinentry], stdin=subprocess.PIPE, stdout=subprocess.PIPE
     )
@@ -28,6 +32,7 @@ def main(argv):
         "CONFIRM" if args.prompt.endswith("?") else "GETPIN",
         "BYE",
     ]
+    logging.debug("cmds=%r", cmds)
     stdout = pinentry.communicate("\n".join(cmds))[0]
     exit_status = 0
     passphrase = None
