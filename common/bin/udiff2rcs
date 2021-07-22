@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+import re
+import sys
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", "-d", action="store_true")
+    parser.add_argument("input_file", nargs="?")
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+    if args.input_file:
+        input_fh = open(args.input_file, "rt")
+    else:
+        input_fh = sys.stdin
+    output_fh = sys.stdout
+    for line in input_fh:
+        if line.startswith("--- "):
+            break
+    else:
+        return
+    line = input_fh.readline()
+    if not line.startswith("+++ "):
+        raise Exception(f"Expected +++ line, got {line!r}")
+    for hunk_header in input_fh:
+        if not hunk_header.strip():
+            continue
+        match = re.search(
+            r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", hunk_header
+        )
+        if not match:
+            raise Exception(f"Expected hunk header, found {hunk_header!r}")
+        logging.debug("Starting hunk %r", hunk_header)
+        old_lines_remaining = int(match.group(2) or 1)
+        new_lines_remaining = int(match.group(4) or 1)
+        line_num = int(match.group(1))
+        last_mode = " "
+        last_mode_start_line_num = None
+        pending_delete_len = None
+        pending_add_lines = None
+        while old_lines_remaining > 0 or new_lines_remaining > 0:
+            line = next(input_fh)
+            if not line:
+                raise Exception("Unexpected end of diff")
+            if line[0] not in " -+":
+                raise Exception(f"Invalid line in hunk: {line!r}")
+            if line[0] != last_mode:
+                if last_mode == "-":
+                    output_fh.write(
+                        f"d{last_mode_start_line_num} {pending_delete_len}\n"
+                    )
+                    pending_delete_len = None
+                elif last_mode == "+":
+                    output_fh.write(
+                        f"a{last_mode_start_line_num} {len(pending_add_lines)}\n"
+                    )
+                    output_fh.writelines(pending_add_lines)
+                    pending_add_lines = None
+                last_mode = line[0]
+                last_mode_start_line_num = line_num
+            if line[0] == " ":
+                old_lines_remaining -= 1
+                new_lines_remaining -= 1
+                line_num += 1
+            elif line.startswith("-"):
+                if pending_delete_len:
+                    pending_delete_len += 1
+                else:
+                    pending_delete_len = 1
+                old_lines_remaining -= 1
+                line_num += 1
+            elif line.startswith("+"):
+                if pending_add_lines:
+                    pending_add_lines.append(line[1:])
+                else:
+                    # I dare you to try and understand this RCS diff
+                    # format we're producing.  See, for example,
+                    # https://github.com/raxod502/apheleia/blob/f865c165dac606187a66b2b25a57d5099b452120/apheleia.el#L158-L189.
+                    last_mode_start_line_num -= 1
+                    pending_add_lines = [line[1:]]
+                new_lines_remaining -= 1
+                # line_num not incremented in this case because it
+                # only counts lines in the original file, as required
+                # by the RCS diff format.
+
+
+if __name__ == "__main__":
+    main()
