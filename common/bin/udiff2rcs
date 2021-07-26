@@ -34,6 +34,9 @@ def main():
         if not match:
             raise Exception(f"Expected hunk header, found {hunk_header!r}")
         logging.debug("Starting hunk %r", hunk_header)
+        # Note: group 3 in the above regexp is unused, but captured
+        # anyway because I thought a little consistency was the least
+        # I could do for you around all that line noise.
         old_lines_remaining = int(match.group(2) or 1)
         new_lines_remaining = int(match.group(4) or 1)
         line_num = int(match.group(1))
