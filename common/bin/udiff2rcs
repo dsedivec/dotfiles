@@ -42,11 +42,17 @@ def main():
         pending_delete_len = None
         pending_add_lines = None
         while old_lines_remaining > 0 or new_lines_remaining > 0:
+            logging.debug(
+                "Starting with old_lines_remaining=%r new_lines_remaining=%r",
+                old_lines_remaining,
+                new_lines_remaining,
+            )
             line = next(input_fh)
             if not line:
                 raise Exception("Unexpected end of diff")
             if line[0] not in " -+":
                 raise Exception(f"Invalid line in hunk: {line!r}")
+            logging.debug("Input line is: %r", line)
             if line[0] != last_mode:
                 if last_mode == "-":
                     output_fh.write(
@@ -85,6 +91,11 @@ def main():
                 # line_num not incremented in this case because it
                 # only counts lines in the original file, as required
                 # by the RCS diff format.
+            logging.debug(
+                "Ending with old_lines_remaining=%r new_lines_remaining=%r",
+                old_lines_remaining,
+                new_lines_remaining,
+            )
 
 
 if __name__ == "__main__":
