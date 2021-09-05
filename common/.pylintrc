@@ -3,7 +3,7 @@
 # Run "pylint --generate-rcfile | less" to see all options.
 
 [MASTER]
-extension-pkg-whitelist = lxml, lxml.etree
+extension-pkg-whitelist = lxml, lxml.etree, pydantic
 
 [BASIC]
 include-naming-hint = yes
