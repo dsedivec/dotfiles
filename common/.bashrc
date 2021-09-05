@@ -311,8 +311,14 @@ then
 	LESS="$LESS -RF"
 	export LESS
 
-	# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.  RH/Fedora
-	# uses lesspipe.sh, so this should be OK.
+	if command -v bat >/dev/null; then
+		export LESSOPEN="|$HOME/bin/batfilter %s"
+	elif is_available lesspipe; then
+		# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.
+		# RH/Fedora uses lesspipe.sh, so this should be OK.
+		eval "$(lesspipe)"
+	fi
+
 	is_available lesspipe && eval "$(lesspipe)"
 fi
 
