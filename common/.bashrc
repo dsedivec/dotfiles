@@ -983,3 +983,9 @@ fi
 ### Cleanup
 
 unset is_available
+
+
+######################################################################
+### Machine-local settings
+
+[ -f "$HOME/.bashrc.local" ] && source "$HOME/.bashrc.local"
