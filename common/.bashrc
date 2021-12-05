@@ -666,8 +666,7 @@ fzf_scripts=()
 if [ -n "${PS1:-}" ]; then
 	if [ -r /opt/local/share/fzf/shell/key-bindings.bash ]; then
 		# MacPorts
-		fzf_scripts=(/opt/local/share/bash-completion/completions/fzf
-		             /opt/local/share/fzf/shell/key-bindings.bash)
+		fzf_scripts=(/opt/local/share/fzf/shell/{completion,key-bindings}.bash)
 	elif [ -r /usr/local/opt/fzf/shell ]; then
 		# Homebrew
 		fzf_scripts=(/usr/local/opt/fzf/shell/{completion,key-bindings}.bash)
