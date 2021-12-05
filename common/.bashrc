@@ -105,6 +105,8 @@ PATH=$HOME/.local/bin:$PATH
 if command -v go >/dev/null; then
 	PATH=$(go env GOPATH)/bin:$PATH
 fi
+# Rust
+PATH=$HOME/.cargo/bin:$PATH
 # Finally, ~/bin always goes first.
 PATH=$HOME/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
