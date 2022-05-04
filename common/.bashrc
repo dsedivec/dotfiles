@@ -310,7 +310,9 @@ then
 	# iTerm2) otherwise you'll do "git log --oneline -1" and then
 	# you'll see no output until you think to try something like
 	# "git log --oneline -1 | cat".
-	LESS="$LESS -RF"
+	if [ "${LESS:=-RF}" != "-RF" ]; then
+		LESS="${LESS%% -RF} -RF"
+	fi
 	export LESS
 
 	if command -v bat >/dev/null; then
