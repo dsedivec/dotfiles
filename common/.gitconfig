@@ -12,6 +12,7 @@
 	local = true
 [push]
 	default = tracking
+	autoSetupRemote = true
 [diff]
 	tool = opendiff
 	guitool = opendiff
