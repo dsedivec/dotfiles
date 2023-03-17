@@ -32,6 +32,9 @@ class GitTool:
         self.fetch_once(remote_name)
         self.prune_once(remote_name)
 
+    def pull_fast_forward(self):
+        subprocess.check_call(["git", "pull", "--ff"])
+
     def get_current_branch_name(self):
         proc = subprocess.run(
             ["git", "symbolic-ref", "--short", "HEAD"],
@@ -192,12 +195,22 @@ def main(argv):
         action="append",
         help="Exclude a branch from being cleaned up; may be used multiple times",
     )
-    parser.add_argument(
+    fetch_parser = parser.add_mutually_exclusive_group()
+    fetch_parser.add_argument(
         "--no-fetch",
         dest="fetch",
         default=True,
         action="store_false",
         help="Don't update remotes",
+    )
+    fetch_parser.add_argument(
+        "--ff",
+        dest="pull",
+        action="store_true",
+        help=(
+            "Fast forward the current branch before attempting to delete branches"
+            " (pointless if you use --force-delete)"
+        ),
     )
     delete_parser = parser.add_mutually_exclusive_group()
     parser.set_defaults(delete=None)
@@ -206,7 +219,7 @@ def main(argv):
         dest="delete",
         action="store_const",
         const="-d",
-        help="Actually delete branches!",
+        help="Actually delete branches!  Consider using with --ff",
     )
     delete_parser.add_argument(
         "--force-delete",
@@ -278,6 +291,8 @@ def main(argv):
             if git.branch_contains(args.merged_with, local_branch):
                 branches_to_delete.add(local_branch)
     if args.delete:
+        if args.pull:
+            git.pull_fast_forward()
         return subprocess.run(
             [
                 "git",
