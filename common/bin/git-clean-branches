@@ -19,13 +19,15 @@ class GitTool:
 
     def fetch_once(self, remote_name: str):
         if remote_name not in self._remotes_fetched:
-            subprocess.check_call(["git", "fetch", remote_name])
+            subprocess.check_call(["git", "fetch", remote_name], stdout=sys.stderr)
             self._remotes_fetched.add(remote_name)
 
     def prune_once(self, remote_name: str):
         assert remote_name, repr(remote_name)
         if remote_name not in self._remotes_pruned:
-            subprocess.check_call(["git", "remote", "prune", remote_name])
+            subprocess.check_call(
+                ["git", "remote", "prune", remote_name], stdout=sys.stderr
+            )
             self._remotes_pruned.add(remote_name)
 
     def refresh_remote_once(self, remote_name: str):
@@ -33,7 +35,7 @@ class GitTool:
         self.prune_once(remote_name)
 
     def pull_fast_forward(self):
-        subprocess.check_call(["git", "pull", "--ff"])
+        subprocess.check_call(["git", "pull", "--ff"], stdout=sys.stderr)
 
     def get_current_branch_name(self):
         proc = subprocess.run(
@@ -99,6 +101,7 @@ class GitTool:
                 container,
             ],
             check=False,
+            stdout=subprocess.DEVNULL,
         )
         if proc.returncode == 0:
             return True
