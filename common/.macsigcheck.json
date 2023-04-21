@@ -85,7 +85,7 @@
     },
     "~/Applications/Insomnia.app": {
         "last_updated": "2019-07-22 01:10:34.473025",
-        "originator": "id:7PU3P6ELJ8"
+        "originator": "id:FX44YY62GV"
     },
     "~/Applications/Moom.app": {
         "last_updated": "2019-07-22 01:10:34.473025",
@@ -105,7 +105,7 @@
     },
     "~/Applications/Steam.app": {
         "last_updated": "2019-10-24 16:52:05.271852",
-        "originator": "^Developer\\ ID\\ Application\\:\\ Valve\\ Corporation$"
+	"originator": "id:MXGJJ98X76"
     },
     "~/Applications/Textual.app": {
         "last_updated": "2019-07-22 01:10:34.473025",
