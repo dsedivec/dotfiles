@@ -23,7 +23,6 @@ case "$dark_mode" in
 esac
 
 export PATH=$HOME/bin:/opt/local/bin:$PATH
-ITERM2_PYTHON_VERSION=3.8.6
 
 ITERM2_PYTHONS=$HOME/Library/Application\ Support/iTerm2/iterm2env/versions
 
@@ -39,7 +38,9 @@ emacsclient -a true \
 if pgrep iTerm2; then
 	if ITERM2_COOKIE=$(osascript -e 'tell application "iTerm2" to request cookie'); then
 		export ITERM2_COOKIE
-		iterm2_python=$ITERM2_PYTHONS/$ITERM2_PYTHON_VERSION/bin/python
+		for dir in "$ITERM2_PYTHONS"/3.10*; do
+			iterm2_python=$dir/bin/python
+		done
 		"$iterm2_python" "$PWD/set_iterm2_color_theme.py" \
 		                 "$iterm_color_preset" || result=1
 	else
