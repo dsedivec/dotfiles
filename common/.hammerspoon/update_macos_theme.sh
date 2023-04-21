@@ -10,12 +10,10 @@ dark_mode=$(osascript -e 'tell application "System Events" to get the dark mode 
 case "$dark_mode" in
 	true)
 		iterm_color_preset="Dark Background"
-		textual_style="Simplified Dark"
 		;;
 
 	false)
 		iterm_color_preset="Light Background"
-		textual_style="Simplified Light"
 		;;
 
 	*)
@@ -26,12 +24,8 @@ esac
 
 export PATH=$HOME/bin:/opt/local/bin:$PATH
 ITERM2_PYTHON_VERSION=3.8.6
-TEXTUAL_AUTO_STYLE_NAME="Simplified Auto"
-TEXTUAL_APP=$HOME/Applications/Textual.app
 
 ITERM2_PYTHONS=$HOME/Library/Application\ Support/iTerm2/iterm2env/versions
-TEXTUAL_APP_STYLES=$TEXTUAL_APP/Contents/Resources/Bundled\ Styles
-TEXTUAL_USER_STYLES=$HOME/Library/Group\ Containers/com.codeux.apps.textual/Library/Application\ Support/Textual/Styles
 
 my_dir=$(dirname "$0")
 cd "$my_dir" || exit 1
@@ -53,11 +47,5 @@ if pgrep iTerm2; then
 	fi
 	unset ITERM2_COOKIE
 fi
-
-# Textual
-textual_src_style=$TEXTUAL_APP_STYLES/$textual_style
-textual_dst_style=$TEXTUAL_USER_STYLES/$TEXTUAL_AUTO_STYLE_NAME
-install -d "$TEXTUAL_USER_STYLES" || result=1
-rsync -av "$textual_src_style/" "$textual_dst_style/" || result=1
 
 exit $result
