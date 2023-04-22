@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8; -*-
 
 import argparse
 import logging
 import subprocess
 import sys
-import urllib
+import urllib.parse
 
 
 def main(argv):
@@ -24,10 +24,13 @@ def main(argv):
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
     logging.debug("Starting %s", args.pinentry)
     pinentry = subprocess.Popen(
-        [args.pinentry], stdin=subprocess.PIPE, stdout=subprocess.PIPE
+        [args.pinentry],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
     )
     cmds = [
-        "SETDESC %s" % (urllib.quote(args.prompt),),
+        "SETDESC %s" % (urllib.parse.quote(args.prompt),),
         "SETTITLE ssh-askpass",
         "CONFIRM" if args.prompt.endswith("?") else "GETPIN",
         "BYE",
@@ -47,7 +50,7 @@ def main(argv):
             if not line.startswith("ERR 83886179 "):
                 sys.stderr.write("pinentry error: %s\n" % (line,))
         elif line.startswith("D "):
-            passphrase = urllib.unquote(line[2:])
+            passphrase = urllib.parse.unquote(line[2:])
         elif not (line == "OK" or line.startswith("OK ")):
             exit_status = -1
             sys.stderr.write("unknown pinentry response: %s\n" % (line,))

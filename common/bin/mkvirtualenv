@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
-from __future__ import division, absolute_import
-from __future__ import print_function, unicode_literals
+#!/usr/bin/env python3
 
 import argparse
 import json
@@ -10,13 +7,13 @@ import os.path
 import shutil
 import subprocess
 import sys
-import urllib
+import urllib.request
 
 
 def download_virtualenv(dest_dir):
     print("attempting to download virtualenv")
     virtualenv_info = json.load(
-        urllib.urlopen("https://pypi.python.org/pypi/virtualenv/json")
+        urllib.request.urlopen("https://pypi.python.org/pypi/virtualenv/json")
     )
     dir_name = "virtualenv-%s" % (virtualenv_info["info"]["version"],)
     for package in virtualenv_info["urls"]:
@@ -24,14 +21,14 @@ def download_virtualenv(dest_dir):
             break
     else:
         raise Exception("can't find sdist for virtualenv")
-    print("will download %s" % (package["url"],))
+    print(f"will download {package['url']}")
     archive_path = os.path.join(dest_dir, package["filename"])
     archive = open(archive_path, "wb")
-    remote_archive = urllib.urlopen(package["url"])
+    remote_archive = urllib.request.urlopen(package["url"])
     shutil.copyfileobj(remote_archive, archive)
     archive.close()
     remote_archive.close()
-    print("extracting %s" % (archive_path,))
+    print(f"extracting {archive_path}")
     # Going to depend on GNU tar to do our work for us here.
     subprocess.check_call(["tar", "-C", dest_dir, "-xf", archive_path])
     os.symlink(
@@ -71,7 +68,7 @@ def main():
             "refusing to overwrite existing %r" % (virtualenv_path,)
         )
     command = [python_exe, virtualenv_script, "--distribute", virtualenv_path]
-    print("executing: %s" % (" ".join(command),))
+    print(f"executing: {' '.join(command)}")
     subprocess.check_call(command)
     if args.requirements:
         command = [
@@ -80,7 +77,7 @@ def main():
             "-r",
             args.requirements,
         ]
-        print("executing: %s" % (" ".join(command),))
+        print(f"executing: {' '.join(command)}")
         subprocess.check_call(command)
 
 
