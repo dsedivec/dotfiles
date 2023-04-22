@@ -83,7 +83,6 @@ set nocompatible
 " Allow switching away from a modified buffer
 set hidden
 set printoptions=paper:letter
-set mouse=a
 
 " Make bracketed paste work on tmux within iTerm.  Really this just enables it
 " for anything that vaguely looks like "screen".  Good luck.
