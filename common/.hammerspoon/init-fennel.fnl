@@ -98,7 +98,7 @@
                                  ;; *ton*.
                                  (hs.axuielement.searchCriteriaFunction
                                   "AXScrollArea")
-                                 {:depth 1})
+                                 {:depth 3})
         (key-macro-log.w "Could not find front-most window for Mail"))))
 
 (global mail-quotefix-hotkey
