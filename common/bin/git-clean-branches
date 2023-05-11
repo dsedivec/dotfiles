@@ -145,7 +145,7 @@ class GitTool:
 class Mode(enum.Enum):
     MERGED_WITH = 1
     MERGED_UPSTREAM = 2
-    DELETED_UPSTREAM = 3
+    MISSING_UPSTREAM = 3
 
 
 def main(argv):
@@ -164,10 +164,10 @@ def main(argv):
         help="Clean branches merged with their upstream branch",
     )
     mode_arg.add_argument(
-        "--deleted-upstream",
+        "--missing-upstream",
         "-u",
         action="store_true",
-        help="Clean branches where the upstream branch has been deleted",
+        help="Clean branches where the upstream branch doesn't exist",
     )
     parser.add_argument(
         "--include-current",
@@ -239,8 +239,8 @@ def main(argv):
         logger.setLevel(_logging.DEBUG)
     if args.merged_upstream:
         mode = Mode.MERGED_UPSTREAM
-    elif args.deleted_upstream:
-        mode = Mode.DELETED_UPSTREAM
+    elif args.missing_upstream:
+        mode = Mode.MISSING_UPSTREAM
     else:
         mode = Mode.MERGED_WITH
     git = GitTool()
@@ -282,7 +282,7 @@ def main(argv):
                 )
             elif git.branch_contains(upstream_branch, local_branch):
                 branches_to_delete.add(local_branch)
-        elif mode == Mode.DELETED_UPSTREAM:
+        elif mode == Mode.MISSING_UPSTREAM:
             if not remote:
                 continue
             if args.fetch:
