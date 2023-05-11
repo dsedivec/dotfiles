@@ -219,6 +219,7 @@ def main(argv):
     parser.set_defaults(delete=None)
     delete_parser.add_argument(
         "--delete",
+        "-d",
         dest="delete",
         action="store_const",
         const="-d",
@@ -226,12 +227,12 @@ def main(argv):
     )
     delete_parser.add_argument(
         "--force-delete",
+        "-D",
         dest="delete",
         action="store_const",
         const="-D",
-        help="Actually delete branches with --force!!",
+        help="Actually delete branches and use --force",
     )
-    parser.add_argument("--debug", "-d", action="store_true")
     parser.add_argument("branches_to_check", nargs="*")
     args = parser.parse_args()
     _logging.basicConfig()
