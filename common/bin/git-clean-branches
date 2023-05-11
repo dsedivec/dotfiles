@@ -141,6 +141,33 @@ class GitTool:
         return remote
 
 
+def prompt_confirm(prompt: str, default: bool | None = None) -> bool:
+    if default is None:
+        default_prompt = "y/n"
+    elif default:
+        default = True
+        default_prompt = "Y/n"
+    else:
+        default = False
+        default_prompt = "y/N"
+    full_prompt = f"{prompt} ({default_prompt}) "
+    while True:
+        sys.stdout.write(full_prompt)
+        sys.stdout.flush()
+        answer = sys.stdin.readline().strip()
+        if answer in ("y", "yes"):
+            result = True
+        elif answer in ("n", "no"):
+            result = False
+        elif answer == "" and default is not None:
+            result = default
+        else:
+            sys.stdout.write(f"Invalid response: {answer!r}\n")
+            continue
+        return result
+    raise Exception("should never get here")
+
+
 @enum.unique
 class Mode(enum.Enum):
     MERGED_WITH = 1
@@ -233,6 +260,15 @@ def main(argv):
         const="-D",
         help="Actually delete branches and use --force",
     )
+    parser.add_argument(
+        "--no-confirm",
+        "-y",
+        dest="confirm_delete",
+        default=True,
+        action="store_false",
+        help="Don't confirm before deleting branches",
+    )
+    parser.add_argument("--debug", action="store_true")
     parser.add_argument("branches_to_check", nargs="*")
     args = parser.parse_args()
     _logging.basicConfig()
@@ -295,21 +331,28 @@ def main(argv):
             if git.branch_contains(args.merged_with, local_branch):
                 branches_to_delete.add(local_branch)
     if args.delete:
-        if args.pull:
-            git.pull_fast_forward()
-        return subprocess.run(
-            [
-                "git",
-                "branch",
-                args.delete,
-                "--",
-                *sorted(branches_to_delete),
-            ]
-        ).returncode
+        print("Branches to be deleted:")
+    for branch in sorted(branches_to_delete):
+        print(branch)
+    if args.delete:
+        if prompt_confirm("Proceed?", default=False):
+            if args.pull:
+                git.pull_fast_forward()
+            exit_status = subprocess.run(
+                [
+                    "git",
+                    "branch",
+                    args.delete,
+                    "--",
+                    *sorted(branches_to_delete),
+                ]
+            ).returncode
+        else:
+            print("Aborted by user, nothing has been deleted.")
+            exit_status = 1
     else:
-        for branch in sorted(branches_to_delete):
-            print(branch)
-        return 0
+        exit_status = 0
+    return exit_status
 
 
 if __name__ == "__main__":
