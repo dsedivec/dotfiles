@@ -68,7 +68,7 @@ call plug#end()
 "colorscheme koehler
 colorscheme delek
 if has('macunix')
-	if system('defaults read -g AppleInterfaceStyle 2>&1') == "Dark"
+	if system('defaults read -g AppleInterfaceStyle 2>&1') == "Dark\n"
 		set background=dark
 	else
 		set background=light
