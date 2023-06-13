@@ -330,27 +330,31 @@ def main(argv):
             assert mode == Mode.MERGED_WITH
             if git.branch_contains(args.merged_with, local_branch):
                 branches_to_delete.add(local_branch)
-    if args.delete:
-        print("Branches to be deleted:")
-    for branch in sorted(branches_to_delete):
-        print(branch)
-    if args.delete:
-        if prompt_confirm("Proceed?", default=False):
-            if args.pull:
-                git.pull_fast_forward()
-            exit_status = subprocess.run(
-                [
-                    "git",
-                    "branch",
-                    args.delete,
-                    "--",
-                    *sorted(branches_to_delete),
-                ]
-            ).returncode
+    if branches_to_delete:
+        if args.delete:
+            print("Branches to be deleted:")
+        for branch in sorted(branches_to_delete):
+            print(branch)
+        if args.delete:
+            if prompt_confirm("Proceed?", default=False):
+                if args.pull:
+                    git.pull_fast_forward()
+                exit_status = subprocess.run(
+                    [
+                        "git",
+                        "branch",
+                        args.delete,
+                        "--",
+                        *sorted(branches_to_delete),
+                    ]
+                ).returncode
+            else:
+                print("Aborted by user, nothing has been deleted.")
+                exit_status = 1
         else:
-            print("Aborted by user, nothing has been deleted.")
-            exit_status = 1
+            exit_status = 0
     else:
+        print("No branches to delete")
         exit_status = 0
     return exit_status
 
