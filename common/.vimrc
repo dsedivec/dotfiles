@@ -37,9 +37,10 @@ Plug 'tpope/vim-surround'
 " https://github.com/ctrlpvim/ctrlp.vim
 Plug 'ctrlpvim/ctrlp.vim'
 let g:ctrlp_extensions = ['buffertag']
+
 " Syntax checking for lots of languages.
-" https://github.com/scrooloose/syntastic
-Plug 'scrooloose/syntastic'
+" https://github.com/dense-analysis/ale
+Plug 'dense-analysis/ale'
 
 " Recommended by https://news.ycombinator.com/item?id=4470283
 
