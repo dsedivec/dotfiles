@@ -336,7 +336,7 @@ def main(argv):
         for branch in sorted(branches_to_delete):
             print(branch)
         if args.delete:
-            if prompt_confirm("Proceed?", default=False):
+            if (not args.confirm_delete) or prompt_confirm("Proceed?", default=False):
                 if args.pull:
                     git.pull_fast_forward()
                 exit_status = subprocess.run(
