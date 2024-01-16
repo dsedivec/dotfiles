@@ -496,9 +496,23 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 
 ######################################################################
+### Colima
+
+if command -v colima >/dev/null; then
+	source <(colima completion bash)
+	cnerdctl() {
+		# Colima's own alias (colima nerctl install) adds --profile
+		# default, but I don't know if/why I need to do that.
+		colima nerdctl -- "$@"
+	}
+fi
+
+
+######################################################################
 ### Various completion
 
 command -v gopass >/dev/null && source <(gopass completion bash)
+command -v limactl >/dev/null && source <(limactl completion bash)
 
 
 ######################################################################
