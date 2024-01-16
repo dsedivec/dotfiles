@@ -887,6 +887,13 @@ if [[ "$PS1" ]]; then
 	fi
 fi
 
+
+######################################################################
+### direnv
+
+# I bet this needs to be after the prompt stuff, since I bet this is
+# going to hook in via the prompt.
+
 if command -v direnv &>/dev/null; then
 	eval "$(direnv hook bash)"
 fi
