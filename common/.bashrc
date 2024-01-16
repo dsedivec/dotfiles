@@ -336,7 +336,6 @@ fi
 VISUAL="$EDITOR"
 export VISUAL EDITOR
 
-
 if REAL_RIPGREP=$(type -P rg); then
 	rg() {
 		if [[ -t 0 && -t 1 ]]; then
