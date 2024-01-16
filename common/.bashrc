@@ -407,6 +407,12 @@ if [ "$(uname -s)" = Darwin ]; then
 	fi
 fi
 
+if ! command -v idea &>/dev/null; then
+	idea() {
+		open -na "IntelliJ IDEA.app" --args "$@"
+	}
+fi
+
 
 ######################################################################
 ### Python
