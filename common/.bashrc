@@ -496,11 +496,9 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 
 ######################################################################
-### gopass completion
+### Various completion
 
-if command -v gopass >/dev/null; then
-	source <(gopass completion bash)
-fi
+command -v gopass >/dev/null && source <(gopass completion bash)
 
 
 ######################################################################
