@@ -20,7 +20,7 @@ tap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(event)
 	then
 		print("received media event")
 		local _output, status, _type, rc = hs.execute(
-			"~/bin/as-mpc " .. MPD_COMMANDS[sys_key_event.key]
+			"~/.local/bin/as-mpc " .. MPD_COMMANDS[sys_key_event.key]
 		)
 		if status and rc == 0 then
 			delete_event = true

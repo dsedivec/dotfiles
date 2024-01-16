@@ -22,7 +22,7 @@ case "$dark_mode" in
 		;;
 esac
 
-export PATH=$HOME/bin:/opt/local/bin:$PATH
+export PATH=$HOME/.local/bin:/opt/local/bin:$PATH
 
 ITERM2_PYTHONS=$HOME/Library/Application\ Support/iTerm2/iterm2env/versions
 

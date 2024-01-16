@@ -314,7 +314,7 @@ then
 	export LESS
 
 	if command -v bat >/dev/null; then
-		export LESSOPEN="|$HOME/bin/batfilter %s"
+		export LESSOPEN="|batfilter %s"
 	elif is_available lesspipe; then
 		# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.
 		# RH/Fedora uses lesspipe.sh, so this should be OK.
@@ -392,7 +392,7 @@ if [ "$(uname -s)" = Darwin ]; then
 	# Python.  Use it if SSH_ASKPASS isn't set and if the binary is
 	# present.
 	if [ -z "$SSH_ASKPASS" ]; then
-		SSH_ASKPASS=$HOME/bin/ssh-askpass
+		SSH_ASKPASS=$HOME/.local/.bin/ssh-askpass
 		if [ -x "$SSH_ASKPASS" ]; then
 			export SSH_ASKPASS
 		else
