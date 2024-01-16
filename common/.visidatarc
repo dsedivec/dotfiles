@@ -1,1 +1,2 @@
-options.motd_url = None
+options.motd_url = ""
+options.plugins_url = ""
