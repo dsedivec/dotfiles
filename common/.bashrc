@@ -103,6 +103,8 @@ if command -v go >/dev/null; then
 fi
 # Rust
 PATH=$HOME/.cargo/bin:$PATH
+# Rancher Desktop
+PATH=$HOME/.rd/bin:$PATH
 # ~/bin used to be where I put all my own scripts (see below), so it
 # gets put near first still. (Remove this once I've gotten rid of the
 # machines using ~/bin.)
