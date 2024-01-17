@@ -97,16 +97,20 @@ if command -v ruby >/dev/null; then
 fi
 # npm packages installed in my home directory.
 PATH=$HOME/.npm-packages/bin:$PATH
-# I think ~/.local/bin is the XDG standard directory nowadays.
-PATH=$HOME/.local/bin:$PATH
 # Go
 if command -v go >/dev/null; then
 	PATH=$(go env GOPATH)/bin:$PATH
 fi
 # Rust
 PATH=$HOME/.cargo/bin:$PATH
-# Finally, ~/bin always goes first.
+# ~/bin used to be where I put all my own scripts (see below), so it
+# gets put near first still. (Remove this once I've gotten rid of the
+# machines using ~/bin.)
 PATH=$HOME/bin:$PATH
+# I think ~/.local/bin is the XDG standard directory nowadays.  This
+# one always goes first because this (now) where I keep my own
+# programs.
+PATH=$HOME/.local/bin:$PATH
 # At the end we want to make sure we get the usual bin directories,
 # including sbins.  We also add on /usr/games for OpenBSD.
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/games
