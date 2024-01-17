@@ -398,7 +398,7 @@ if [ "$(uname -s)" = Darwin ]; then
 	# Python.  Use it if SSH_ASKPASS isn't set and if the binary is
 	# present.
 	if [ -z "$SSH_ASKPASS" ]; then
-		SSH_ASKPASS=$HOME/.local/.bin/ssh-askpass
+		SSH_ASKPASS=$HOME/.local/bin/ssh-askpass
 		if [ -x "$SSH_ASKPASS" ]; then
 			export SSH_ASKPASS
 		else
