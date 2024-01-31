@@ -462,6 +462,9 @@ workon() {
 	. "$activate"
 }
 
+# https://github.com/pypa/pipx/issues/1212
+export PIPX_HOME=$HOME/.local/share/pipx
+
 
 ######################################################################
 ### Node.js/npm
