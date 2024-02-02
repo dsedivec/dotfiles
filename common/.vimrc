@@ -67,7 +67,6 @@ call plug#end()
 " Note that vim-plug does "filetype plug indent on" and "syntax enable".
 
 "colorscheme koehler
-colorscheme delek
 if has('macunix')
 	if system('defaults read -g AppleInterfaceStyle 2>&1') == "Dark\n"
 		set background=dark
