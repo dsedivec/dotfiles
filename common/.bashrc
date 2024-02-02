@@ -18,7 +18,8 @@
 if [[ -z "$BASH_COMPLETION" || ! -r "$BASH_COMPLETION" ]]; then
 	for script in /etc/bash_completion \
 	              /opt/local/etc/bash_completion \
-	              /usr/local/etc/profile.d/bash_completion.sh
+	              /usr/local/etc/profile.d/bash_completion.sh \
+	              /opt/homebrew/etc/profile.d/bash_completion.sh
 	do
 		if [ -r "$script" ]; then
 			. "$script"
@@ -70,11 +71,11 @@ fi
 # Unfortunately we have to add stuff on to the front of the path in
 # reverse order.
 #
+# Homebrew.  Put the ARM Mac path first, /usr/local/bin second since that may
+# or may not be the one we intend.
+PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
 # MacPorts
 PATH=/opt/local/bin:/opt/local/sbin:$PATH
-# Homebrew, in my special location (/usr/local, the normal Homebrew
-# prefix, will be put in PATH below, and not just for Homebrew)
-PATH=$HOME/.brew/bin:$PATH
 # Local directories, for OpenBSD ports and Homebrew.
 PATH=/usr/local/bin:/usr/local/sbin:$PATH
 # The various places ccache might get installed.
@@ -589,8 +590,11 @@ if [ -n "${PS1:-}" ]; then
 		# MacPorts
 		fzf_scripts=(/opt/local/share/fzf/shell/{completion,key-bindings}.bash)
 	elif [ -r /usr/local/opt/fzf/shell ]; then
-		# Homebrew
+		# Intel Homebrew
 		fzf_scripts=(/usr/local/opt/fzf/shell/{completion,key-bindings}.bash)
+	elif [ -r /opt/homebrew/opt/fzf/shell ]; then
+		# ARM Homebrew
+		fzf_scripts=(/opt/homebrew/opt/fzf/shell/{completion,key-bindings}.bash)
 	else
 		fzf_scripts=()
 	fi
