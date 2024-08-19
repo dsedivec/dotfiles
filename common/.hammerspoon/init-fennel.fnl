@@ -134,23 +134,30 @@
 (global moom-modal-saved-frames {})
 
 (fn moom-modal-window-key [win]
+  "Make unique key for window WIN."
   (.. (or (-?> (win:application) (: :pid)) "nil app")
       "|"
       (or (win:id) "nil win")))
 
 (fn moom-modal-save-frame [?win ?key ?frame]
+  "Save the geometry of WIN."
   (let [win (or ?win (hs.window.frontmostWindow))
         key (or ?key (moom-modal-window-key win))
         frame (or ?frame (win:frame))]
     (tset moom-modal-saved-frames key (hs.geometry.copy frame))))
 
 (fn moom-modal-maybe-save-frame [?win ?frame]
+  "Save the geometry of WIN if it hasn't been saved previously."
   (let [win (or ?win (hs.window.frontmostWindow))
         key (moom-modal-window-key win)]
     (when (not (. moom-modal-saved-frames key))
       (moom-modal-save-frame win key ?frame))))
 
 (fn moom-modal-restore-frame [?win]
+  "Restore previously saved geometry of WIN, if any.
+
+If the geometry was saved, it is cleared before restoring the window's
+geometry."
   (let [win (or ?win (hs.window.frontmostWindow))
         key (moom-modal-window-key win)
         frame (. moom-modal-saved-frames key)]
@@ -159,11 +166,13 @@
       (win:setFrame frame 0))))
 
 (fn moom-modal-clear-alert []
+  "Clear the Moom overlay, if any."
   (when moom-modal-alert
     (hs.alert.closeSpecific moom-modal-alert)
     (global moom-modal-alert nil)))
 
 (fn moom-modal-show-alert [msg]
+  "Show the Moom overlay."
   (moom-modal-clear-alert)
   (global moom-modal-alert
           (hs.alert.show msg
@@ -179,6 +188,7 @@
   (moom-modal-clear-alert))
 
 (fn moom-window-center []
+  "Center the frontmost window."
   (: (hs.window.frontmostWindow) :centerOnScreen nil true 0))
 
 (fn moom-window-grow [axis]
@@ -232,6 +242,9 @@
     (win:setFrame frame 0)))
 
 (fn moom-window-set-unit-frame [unit-rect]
+  "Move the frontmost window based on the given unit rectangle.
+
+See hs.geometry documentation for the syntax of UNIT-RECT."
   (let [win (hs.window.frontmostWindow)]
     (moom-modal-maybe-save-frame win)
     (: win :move unit-rect nil true 0)))
