@@ -302,7 +302,14 @@ fi
 # Done with this variable.
 unset dircolors
 
-if is_available less
+if is_available bat
+then
+	# Nowadays, Bat will invoke its own pager, like less.
+	PAGER=bat
+	export PAGER
+
+	alias less=bat
+elif is_available less
 then
 	PAGER=less
 	export PAGER
@@ -320,9 +327,7 @@ then
 	fi
 	export LESS
 
-	if command -v bat >/dev/null; then
-		export LESSOPEN="|batfilter %s"
-	elif is_available lesspipe; then
+	if is_available lesspipe; then
 		# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.
 		# RH/Fedora uses lesspipe.sh, so this should be OK.
 		eval "$(lesspipe)"
