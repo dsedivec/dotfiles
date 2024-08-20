@@ -528,6 +528,7 @@ fi
 
 command -v gopass >/dev/null && source <(gopass completion bash)
 command -v limactl >/dev/null && source <(limactl completion bash)
+command -v docker >/dev/null && source <(docker completion bash)
 
 
 ######################################################################
