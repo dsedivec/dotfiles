@@ -8,7 +8,7 @@ call plug#begin('~/.vim/plugged')
 
 " Plug-ins
 Plug 'tpope/vim-sensible'
-Plug 'scrooloose/nerdcommenter'
+Plug 'tomtom/tcomment_vim'
 Plug 'easymotion/vim-easymotion'
 " Lets you kill a buffer without killing its window.
 " Try :BW (instead of :bw)
