@@ -351,7 +351,18 @@ export VISUAL EDITOR
 if REAL_RIPGREP=$(type -P rg); then
 	rg() {
 		if [[ -t 0 && -t 1 ]]; then
-			"$REAL_RIPGREP" -p "$@" | "${PAGER:-less}"
+			local pager
+			if [ -n "$RG_PAGER" ]; then
+				pager=$RG_PAGER
+			elif [ -z "$PAGER" ]; then
+				pager=less
+			elif [ "$PAGER" = "bat" ]; then
+				# bat doesn't handle ripgrep's formatted output well.
+				pager=less
+			else
+				pager=$PAGER
+			fi
+			"$REAL_RIPGREP" -p "$@" | "$pager"
 		else
 			"$REAL_RIPGREP" "$@"
 		fi
