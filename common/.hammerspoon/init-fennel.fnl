@@ -203,31 +203,71 @@ geometry."
 
 (fn moom-window-to-left-side []
   (let [win (hs.window.frontmostWindow)
-        frame (win:frame)]
-    (moom-modal-maybe-save-frame win frame)
-    (tset frame :x 0)
-    (win:setFrameInScreenBounds frame 0)))
+        win-frame (win:frame)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win win-frame)
+    (if (= (. win-frame :x) (. screen-frame :x))
+        (win:moveOneScreenWest true true)
+        (do
+          (tset win-frame :x 0)
+          (win:setFrameInScreenBounds win-frame 0)))))
 
 (fn moom-window-to-right-side []
   (let [win (hs.window.frontmostWindow)
-        frame (win:frame)]
-    (moom-modal-maybe-save-frame win frame)
-    (tset frame :x (- (. (: (win:screen) :frame) :x2) (. frame :w)))
-    (win:setFrameInScreenBounds frame 0)))
+        win-frame (win:frame)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win win-frame)
+    (if (= (. win-frame :x2) (. screen-frame :x2))
+        (win:moveOneScreenEast true true)
+        (do
+          (tset win-frame :x (- (. screen-frame :x2) (. win-frame :w)))
+          (win:setFrameInScreenBounds win-frame 0)))))
 
 (fn moom-window-to-top-side []
   (let [win (hs.window.frontmostWindow)
-        frame (win:frame)]
-    (moom-modal-maybe-save-frame win frame)
-    (tset frame :y (. (: (win:screen) :frame) :y))
-    (win:setFrameInScreenBounds frame 0)))
+        win-frame (win:frame)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win win-frame)
+    (if (= (. win-frame :y) (. screen-frame :y))
+        (win:moveOneScreenNorth true true)
+        (do
+          (tset win-frame :y (. screen-frame :y))
+          (win:setFrameInScreenBounds win-frame 0)))))
 
 (fn moom-window-to-bottom-side []
   (let [win (hs.window.frontmostWindow)
-        frame (win:frame)]
-    (moom-modal-maybe-save-frame win frame)
-    (tset frame :y (- (. (: (win:screen) :frame) :y2) (. frame :h)))
-    (win:setFrameInScreenBounds frame 0)))
+        win-frame (win:frame)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win win-frame)
+    (if (= (. win-frame :y2) (. screen-frame :y2))
+        (win:moveOneScreenSouth true true)
+        (do
+          (tset win-frame :y (- (. screen-frame :y2) (. win-frame :h)))
+          (win:setFrameInScreenBounds win-frame 0)))))
+
+(fn moom-window-to-left-screen []
+  "Move the frontmost window to the screen to the left and center it."
+  (let [win (hs.window.frontmostWindow)]
+    (win:moveOneScreenWest true true)
+    (win:centerOnScreen nil true 0)))
+
+(fn moom-window-to-right-screen []
+  "Move the frontmost window to the screen to the right and center it."
+  (let [win (hs.window.frontmostWindow)]
+    (win:moveOneScreenEast true true)
+    (win:centerOnScreen nil true 0)))
+
+(fn moom-window-to-up-screen []
+  "Move the frontmost window to the screen above and center it."
+  (let [win (hs.window.frontmostWindow)]
+    (win:moveOneScreenNorth true true)
+    (win:centerOnScreen nil true 0)))
+
+(fn moom-window-to-down-screen []
+  "Move the frontmost window to the screen below and center it."
+  (let [win (hs.window.frontmostWindow)]
+    (win:moveOneScreenSouth true true)
+    (win:centerOnScreen nil true 0)))
 
 (fn moom-window-move [axis amount]
   (let [win (hs.window.frontmostWindow)
@@ -280,11 +320,25 @@ See hs.geometry documentation for the syntax of UNIT-RECT."
   (let [[key axis amount] dir
         dimension (if (= axis :x) :w :h)
         move-fn #(moom-window-move axis (* amount 100))
-        resize-fn #(moom-window-resize dimension (* amount 100))]
-    (moom-modal:bind [] key move-fn nil move-fn)
-    (moom-modal:bind ["shift"] key resize-fn nil resize-fn)))
+        move-lots-fn #(moom-window-move axis (* amount 500))
+        resize-fn #(moom-window-resize dimension (* amount 100))
+        resize-lots-fn #(moom-window-resize dimension (* amount 500))]
+    (moom-modal:bind "" key move-fn nil move-fn)
+    (moom-modal:bind "alt" key move-lots-fn nil move-lots-fn)
+    (moom-modal:bind "shift" key resize-fn nil resize-fn)
+    (moom-modal:bind "alt-shift" key resize-lots-fn nil resize-lots-fn)))
 (moom-modal:bind "" "r" moom-modal-restore-frame)
 (moom-modal:bind "" "s" moom-modal-save-frame)
+(moom-modal:bind "cmd" "left" moom-window-to-left-screen)
+(moom-modal:bind "cmd" "right" moom-window-to-right-screen)
+(moom-modal:bind "cmd" "up" moom-window-to-up-screen)
+(moom-modal:bind "cmd" "down" moom-window-to-down-screen)
+;; Kinda duplicate binds, because my hands are dumb and remember these
+;; keys.
+(moom-modal:bind "cmd" "[" moom-window-to-left-screen)
+(moom-modal:bind "cmd" "]" moom-window-to-right-screen)
+(moom-modal:bind "cmd" "d" moom-window-to-up-screen)
+(moom-modal:bind "cmd" "u" moom-window-to-down-screen)
 
 (hs.hotkey.bind ["alt"] "=" moom-window-maximize)
 
