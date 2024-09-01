@@ -245,6 +245,46 @@ geometry."
           (tset win-frame :y (- (. screen-frame :y2) (. win-frame :h)))
           (win:setFrameInScreenBounds win-frame 0)))))
 
+(fn moom-window-left-half []
+  "Move the frontmost window to the left half of its current screen."
+  (let [win (hs.window.frontmostWindow)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win)
+    (win:setFrame {:x (. screen-frame :x)
+                   :y (. screen-frame :y)
+                   :w (/ (. screen-frame :w) 2)
+                   :h (. screen-frame :h)})))
+
+(fn moom-window-right-half []
+  "Move the frontmost window to the right half of its current screen."
+  (let [win (hs.window.frontmostWindow)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win)
+    (win:setFrame {:x (+ (. screen-frame :x) (/ (. screen-frame :w) 2))
+                   :y (. screen-frame :y)
+                   :w (/ (. screen-frame :w) 2)
+                   :h (. screen-frame :h)})))
+
+(fn moom-window-top-half []
+  "Move the frontmost window to the top half of its current screen."
+  (let [win (hs.window.frontmostWindow)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win)
+    (win:setFrame {:x (. screen-frame :x)
+                   :y (. screen-frame :y)
+                   :w (. screen-frame :w)
+                   :h (/ (. screen-frame :h) 2)})))
+
+(fn moom-window-bottom-half []
+  "Move the frontmost window to the bottom half of its current screen."
+  (let [win (hs.window.frontmostWindow)
+        screen-frame (: (win:screen) :frame)]
+    (moom-modal-maybe-save-frame win)
+    (win:setFrame {:x (. screen-frame :x)
+                   :y (+ (. screen-frame :y) (/ (. screen-frame :h) 2))
+                   :w (. screen-frame :w)
+                   :h (/ (. screen-frame :h) 2)})))
+
 (fn moom-window-to-left-screen []
   "Move the frontmost window to the screen to the left and center it."
   (let [win (hs.window.frontmostWindow)]
@@ -343,6 +383,11 @@ See hs.geometry documentation for the syntax of UNIT-RECT."
 ;; (moom-modal:bind "cmd" "]" moom-window-to-right-screen)
 ;; (moom-modal:bind "cmd" "d" moom-window-to-up-screen)
 ;; (moom-modal:bind "cmd" "u" moom-window-to-down-screen)
+
+(moom-modal:bind "" "1" moom-window-left-half)
+(moom-modal:bind "" "3" moom-window-right-half)
+(moom-modal:bind "" "2" moom-window-top-half)
+(moom-modal:bind "" "4" moom-window-bottom-half)
 
 (hs.hotkey.bind ["alt"] "=" moom-window-maximize)
 
