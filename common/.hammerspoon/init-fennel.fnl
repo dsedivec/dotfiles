@@ -302,6 +302,7 @@ See hs.geometry documentation for the syntax of UNIT-RECT."
 (moom-modal:bind "" "escape" (fn [] (moom-modal:exit)))
 (moom-modal:bind "alt" "escape" (fn [] (moom-modal:exit)))
 (moom-modal:bind "" "return" (fn [] (moom-modal:exit)))
+
 (moom-modal:bind "" "tab" moom-window-center)
 (moom-modal:bind "" "g" #(moom-window-grow :y))
 (moom-modal:bind "shift" "g" #(moom-window-grow :x))
@@ -313,6 +314,7 @@ See hs.geometry documentation for the syntax of UNIT-RECT."
 (moom-modal:bind "shift" "]" #(moom-window-set-unit-frame "[50, 0, 100, 100]"))
 (moom-modal:bind "shift" "u" #(moom-window-set-unit-frame "[0, 0, 100, 50]"))
 (moom-modal:bind "shift" "d" #(moom-window-set-unit-frame "[0, 50, 100, 100]"))
+
 (each [_ dir (ipairs [["up" :y -1]
                       ["down" :y 1]
                       ["left" :x -1]
@@ -327,8 +329,10 @@ See hs.geometry documentation for the syntax of UNIT-RECT."
     (moom-modal:bind "alt" key move-lots-fn nil move-lots-fn)
     (moom-modal:bind "shift" key resize-fn nil resize-fn)
     (moom-modal:bind "alt-shift" key resize-lots-fn nil resize-lots-fn)))
+
 (moom-modal:bind "" "r" moom-modal-restore-frame)
 (moom-modal:bind "" "s" moom-modal-save-frame)
+
 (moom-modal:bind "cmd" "left" moom-window-to-left-screen)
 (moom-modal:bind "cmd" "right" moom-window-to-right-screen)
 (moom-modal:bind "cmd" "up" moom-window-to-up-screen)
