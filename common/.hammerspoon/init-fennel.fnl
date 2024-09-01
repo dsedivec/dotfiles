@@ -339,10 +339,10 @@ See hs.geometry documentation for the syntax of UNIT-RECT."
 (moom-modal:bind "cmd" "down" moom-window-to-down-screen)
 ;; Kinda duplicate binds, because my hands are dumb and remember these
 ;; keys.
-(moom-modal:bind "cmd" "[" moom-window-to-left-screen)
-(moom-modal:bind "cmd" "]" moom-window-to-right-screen)
-(moom-modal:bind "cmd" "d" moom-window-to-up-screen)
-(moom-modal:bind "cmd" "u" moom-window-to-down-screen)
+;; (moom-modal:bind "cmd" "[" moom-window-to-left-screen)
+;; (moom-modal:bind "cmd" "]" moom-window-to-right-screen)
+;; (moom-modal:bind "cmd" "d" moom-window-to-up-screen)
+;; (moom-modal:bind "cmd" "u" moom-window-to-down-screen)
 
 (hs.hotkey.bind ["alt"] "=" moom-window-maximize)
 
