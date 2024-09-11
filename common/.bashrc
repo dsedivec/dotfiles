@@ -302,14 +302,7 @@ fi
 # Done with this variable.
 unset dircolors
 
-if is_available bat
-then
-	# Nowadays, Bat will invoke its own pager, like less.
-	PAGER=bat
-	export PAGER
-
-	alias less=bat
-elif is_available less
+if is_available less
 then
 	PAGER=less
 	export PAGER
@@ -327,7 +320,9 @@ then
 	fi
 	export LESS
 
-	if is_available lesspipe; then
+	if command -v bat >/dev/null; then
+		export LESSOPEN="|batfilter %s"
+	elif is_available lesspipe; then
 		# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.
 		# RH/Fedora uses lesspipe.sh, so this should be OK.
 		eval "$(lesspipe)"
@@ -351,18 +346,7 @@ export VISUAL EDITOR
 if REAL_RIPGREP=$(type -P rg); then
 	rg() {
 		if [[ -t 0 && -t 1 ]]; then
-			local pager
-			if [ -n "$RG_PAGER" ]; then
-				pager=$RG_PAGER
-			elif [ -z "$PAGER" ]; then
-				pager=less
-			elif [ "$PAGER" = "bat" ]; then
-				# bat doesn't handle ripgrep's formatted output well.
-				pager=less
-			else
-				pager=$PAGER
-			fi
-			"$REAL_RIPGREP" -p "$@" | "$pager"
+			"$REAL_RIPGREP" -p "$@" | "${PAGER:-less}"
 		else
 			"$REAL_RIPGREP" "$@"
 		fi
