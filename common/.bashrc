@@ -6,6 +6,10 @@
 ######################################################################
 ### Loading up other people's ideas of what should be in my bashrc.
 
+# Homebrew's installation of bash-completion gets angry if it can't
+# find "brew" in the path.  We'll clean up PATH later.
+PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+
 # Use bash_completion.  I think this was born from Ubuntu's
 # /etc/skel/.bashrc, which (I guess) suggested /etc/bash_completion as
 # the thing to source.
