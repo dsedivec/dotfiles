@@ -1,0 +1,14 @@
+{
+    "extraPaths": ["plugins"],
+    "typeCheckingMode": "all",
+    "reportAny": false,
+    "reportImplicitOverride": false,
+    "reportImplicitStringConcatenation": false,
+    "reportInvalidCast": false,
+    "reportMissingParameterType": false,
+    "reportUnknownArgumentType": false,
+    "reportUnknownMemberType": false,
+    "reportUnknownParameterType": false,
+    "reportUnknownVariableType": false,
+    "reportUnusedCallResult": false
+}
