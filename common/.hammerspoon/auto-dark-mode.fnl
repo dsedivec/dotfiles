@@ -53,14 +53,21 @@
             callback (lambda [loc]
                        (set cached-location {:time (os.time) :loc loc})
                        (callback loc))
-            ;; Try and get location from macOS Location Services
-            ;; first.  I wonder if I should just try hs.location.get
-            ;; and skip all the rest.
-            loc-serv-loc (and (hs.location.servicesEnabled)
-                              (let [status (hs.location.authorizationStatus)]
-                                (or (= status "undefined")
-                                    (= status "authorized")))
-                              (hs.location.get))]
+            ;; I used to check hs.location.servicesEnabled() and
+            ;; hs.location.authorizationStatus() here, but the
+            ;; authorization status was apparently never quite
+            ;; reliable (returned "undefined" sometimes for no
+            ;; apparent reason).  I think the location module isn't
+            ;; initialized properly until you get the location for the
+            ;; first time, so now we just skip straight to that.
+            ;;
+            ;; Actually, there is something *deeply fucked* about
+            ;; hs.location.get().  The thing you run after you call it
+            ;; is... fucking skipped?????  Hammerspoon smfh.
+            ;;
+            ;; Call it twice.  One of them might work!
+            loc-serv-loc (or (hs.location.get)
+                             (hs.location.get))]
         (if loc-serv-loc
             (callback loc-serv-loc)
             (hs.http.asyncGet "https://ipinfo.io"
@@ -220,10 +227,11 @@
 
 ;;; Public API
 
-(lambda start-auto-dark-mode []
+(lambda start-auto-dark-mode [force-manual]
   (let [cap (get-macos-theme-switch-capabilities)]
     (assert (or (= cap :manual) (= cap :automatic)))
-    (when (= cap :manual)
+    (when (or force-manual (= cap :manual))
+      (print "Auto-dark mode using its own timer")
       (update-auto-dark-mode-and-timer)
       (start-caffeinate-watcher))
     (start-notification-watcher)))

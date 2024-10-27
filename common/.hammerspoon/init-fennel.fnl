@@ -56,7 +56,7 @@
 
 (table.insert auto-dark-mode.hooks my-dark-mode-hook)
 
-(auto-dark-mode.start)
+(auto-dark-mode.start true)
 
 ;; Call my hook to sync up with current system state.
 (my-dark-mode-hook (auto-dark-mode.currently-dark?))
