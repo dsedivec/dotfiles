@@ -1,5 +1,6 @@
 " Notes:
-" Leader is \
+" \: Leader
+" gcc: Toggle comment via tcomment_vim
 
 " vim-plug
 " Upgrade vim-plug: :PlugUpgrade
