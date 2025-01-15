@@ -894,7 +894,7 @@ if [[ "$PS1" ]]; then
 		fi
 	}
 	PROMPT_COMMAND="_prompt_command${PROMPT_COMMAND:+; ${PROMPT_COMMAND}}"
-	PS1='\[${_fancy_prompt_color}\]☰ \u@\h \[${_fancy_prompt_reset}\] \W \$ '
+	PS1='\[${_fancy_prompt_color}\]⮕ \u@\h \[${_fancy_prompt_reset}\] \W \$ '
 	if [ "$INSIDE_EMACS" = vterm ]; then
 		vterm_prompt_end(){
 			vterm_printf "51;A$(whoami)@$(hostname):$(pwd)"
