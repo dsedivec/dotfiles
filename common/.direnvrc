@@ -9,7 +9,8 @@ layout_poetry() {
   # create venv if it doesn't exist
   poetry run true
 
-  export VIRTUAL_ENV=$(poetry env info --path)
+  VIRTUAL_ENV=$(poetry env info --path) || exit 2
+  export VIRTUAL_ENV
   export POETRY_ACTIVE=1
   PATH_add "$VIRTUAL_ENV/bin"
 }
