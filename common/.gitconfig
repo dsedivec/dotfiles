@@ -32,6 +32,7 @@
 	co = checkout
 	wdiff = diff --word-diff
 	conflicts = diff --name-only --diff-filter=U --relative
+	pfl = push --force-with-lease --force-if-includes
 	# Nice output for scripts.
 	ls-branches = for-each-ref --format='%(refname:lstrip=2)' refs/heads/*
 	fzf-rm-branches = !git ls-branches \
@@ -121,3 +122,5 @@
 	rebase = false
 [init]
 	defaultBranch = main
+[column]
+	ui = auto
