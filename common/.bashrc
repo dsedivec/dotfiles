@@ -209,10 +209,12 @@ HISTCONTROL=ignoredups:ignorespace
 HISTTIMEFORMAT='%F %T '
 # Append to history.
 shopt -s histappend
-# Append after every command.  I'm hoping this prevents the last shell
-# to exit from obliterating the history of every other shell I have
-# open.
-PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND}; }history -a"
+if [ -n "$HISTFILE" ]; then
+	# Append after every command.  I'm hoping this prevents the last
+	# shell to exit from obliterating the history of every other shell
+	# I have open.
+	PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND}; }history -a"
+fi
 
 # check the window size after each command and, if necessary, update
 # the values of LINES and COLUMNS.  (Stolen from Ubuntu; RH/FC does
