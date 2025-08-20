@@ -2,6 +2,7 @@
     "extraPaths": ["plugins"],
     "typeCheckingMode": "all",
     "reportAny": false,
+    "reportExplicitAny": false,
     "reportImplicitOverride": false,
     "reportImplicitStringConcatenation": false,
     "reportInvalidCast": false,
