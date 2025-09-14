@@ -349,6 +349,9 @@ fi
 VISUAL="$EDITOR"
 export VISUAL EDITOR
 
+# While we're talking about Git, add a Difftastic alias.
+alias gitsd='git -c diff.external=difft'
+
 if REAL_RIPGREP=$(type -P rg); then
 	rg() {
 		if [[ -t 0 && -t 1 ]]; then
