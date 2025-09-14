@@ -1,5 +1,4 @@
 {
-    "extraPaths": ["plugins"],
     "typeCheckingMode": "all",
     "reportAny": false,
     "reportExplicitAny": false,
