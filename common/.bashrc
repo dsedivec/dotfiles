@@ -51,7 +51,7 @@ fi
 # Tests if a program is available.
 is_available () {
 	local where
-	where=$(which "$1" 2>&1)
+	where=$(type -f -p "$1" 2>&1)
 	[ -x "$where" ]
 	return $?
 }  # is_available
@@ -97,13 +97,13 @@ PATH=$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH
 # Maybe Ruby gems installed with --user-install.  In my experience,
 # this always yields a directory, even if that directory doesn't
 # exist.
-if command -v ruby >/dev/null; then
+if is_available ruby; then
 	PATH=$(ruby -r rubygems -e 'puts Gem.user_dir')/bin:$PATH
 fi
 # npm packages installed in my home directory.
 PATH=$HOME/.npm-packages/bin:$PATH
 # Go
-if command -v go >/dev/null; then
+if is_available go; then
 	PATH=$(go env GOPATH)/bin:$PATH
 fi
 # Rust
@@ -326,7 +326,7 @@ then
 	fi
 	export LESS
 
-	if command -v bat >/dev/null; then
+	if is_available bat; then
 		export LESSOPEN="|batfilter %s"
 	elif is_available lesspipe; then
 		# Ubuntu /etc/skel/.bashrc sets up lesspipe like this.
@@ -341,10 +341,10 @@ fi
 # breaking otherwise.
 if is_available vim
 then
-	EDITOR=$(which vim)
+	EDITOR=$(type -f -p vim)
 	alias vi=vim
 else
-	EDITOR=$(which vi)
+	EDITOR=$(type -f -p vi)
 fi
 VISUAL="$EDITOR"
 export VISUAL EDITOR
@@ -370,9 +370,9 @@ fi
 RIPGREP_CONFIG_PATH=$HOME/.rgrc
 export RIPGREP_CONFIG_PATH
 
-if ! command -v telnet >/dev/null; then
+if ! is_available telnet; then
 	for telnet_subst in ncat socat nc; do
-		if command -v "$telnet_subst" >/dev/null; then
+		if is_available "$telnet_subst"; then
 			case "$telnet_subst" in
 				ncat | nc)
 					alias telnet="$telnet_subst -v"
@@ -517,7 +517,7 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 ######################################################################
 ### Colima
 
-if command -v colima >/dev/null; then
+if is_available colima; then
 	source <(colima completion bash)
 	cnerdctl() {
 		# Colima's own alias (colima nerctl install) adds --profile
@@ -530,9 +530,9 @@ fi
 ######################################################################
 ### Various completion
 
-command -v gopass >/dev/null && source <(gopass completion bash)
-command -v limactl >/dev/null && source <(limactl completion bash)
-command -v docker >/dev/null && source <(docker completion bash)
+is_available gopass && source <(gopass completion bash)
+is_available limactl && source <(limactl completion bash)
+is_available docker && source <(docker completion bash)
 
 
 ######################################################################
@@ -546,11 +546,11 @@ command -v docker >/dev/null && source <(docker completion bash)
 # https://github.com/skywind3000/z.lua and good ol'
 # https://github.com/rupa/z.
 
-if command -v zoxide >/dev/null; then
+if is_available zoxide; then
 	eval "$(zoxide init bash)"
 	# Make it more like good ol' fasd.
 	alias zz=zi
-elif command -v fasd >/dev/null; then
+elif is_available fasd; then
 	eval "$(fasd --init auto)"
 fi
 
@@ -733,7 +733,7 @@ if (( ${#fzf_scripts[@]} )); then
 	FZF_COMPLETION_TRIGGER='xx'
 	FZF_CTRL_R_OPTS="${FZF_CTRL_R_OPTS:-} --preview='echo {}' --preview-window=up:3:wrap"
 
-	if command -v fd >/dev/null; then
+	if is_available fd; then
 		# fd might be faster than find.
 		FZF_DEFAULT_COMMAND='fd -H --color=always'
 		FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --ansi"
