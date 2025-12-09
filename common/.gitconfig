@@ -30,6 +30,7 @@
 	ssb = status -sb
 	dc = diff --cached
 	co = checkout
+	wt = worktree
 	wdiff = diff --word-diff
 	conflicts = diff --name-only --diff-filter=U --relative
 	pfl = push --force-with-lease --force-if-includes
