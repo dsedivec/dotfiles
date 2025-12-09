@@ -125,3 +125,5 @@
 	defaultBranch = main
 [column]
 	ui = auto
+[worktree]
+	useRelativePaths = true
