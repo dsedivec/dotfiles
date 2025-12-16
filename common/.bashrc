@@ -735,10 +735,25 @@ if (( ${#fzf_scripts[@]} )); then
 
 	if is_available fd; then
 		# fd might be faster than find.
-		FZF_DEFAULT_COMMAND='fd -H --color=always'
+		FZF_DEFAULT_COMMAND='fd --hidden --color=always'
 		FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --ansi"
+		FZF_ALT_SHIFT_C_COMMAND='fd --hidden --type dir'
+		FZF_ALT_C_COMMAND="$FZF_ALT_SHIFT_C_COMMAND --max-depth 1"
 		FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+	else
+		FZF_ALT_C_COMMAND='find . -type d -print'
+		FZF_ALT_SHIFT_C_COMMAND='find . -maxdepth 1 -type d -print'
 	fi
+
+	if is_available tree; then
+		FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
+	fi
+
+	__fzf_cd_deep__() {
+		local FZF_ALT_C_COMMAND=$FZF_ALT_SHIFT_C_COMMAND
+		__fzf_cd__
+	}
+	bind -m emacs-standard '"\eC": " \C-b\C-k \C-u`__fzf_cd_deep__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d\C-y\ey\C-_"'
 
 	# Complete all commands with "**"?  I don't know why this isn't
 	# the default for Bash.  Thinking complete -D might be too new?
