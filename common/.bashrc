@@ -238,8 +238,10 @@ fi
 # Holy shit do I hate accidentally hitting M-n/M-p and then wondering
 # where the fuck my command went.  (These are non-incremental search
 # forward/backward in history, by default.)
-bind -r '\en'
-bind -r '\ep'
+if [[ "$PS1" ]]; then
+	bind -r '\en'
+	bind -r '\ep'
+fi
 
 # On OS X 10.5[.3, at least] things other than Terminal.app seem to be
 # getting COMMAND_MODE=legacy.  This changes what get_compat returns,
