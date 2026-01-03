@@ -431,6 +431,34 @@ if ! command -v idea &>/dev/null; then
 	}
 fi
 
+# yazi, the terminal file manager, assumes you have a working
+# alternate screen, which I usually don't.  This will move to the
+# bottom of the screen when it exits.  This function only clears the
+# screen if yazi is actually available when you try and run it.
+yazi() {
+	local arg yazi_will_destroy_screen=1
+    for arg in "$@"; do
+	    case "$arg" in
+		    --help|-h|--version|-v|--debug)
+			    yazi_will_destroy_screen=0
+			    break
+			    ;;
+	    esac
+    done
+	command yazi "$@"
+	local rc=$?
+	if [ $yazi_will_destroy_screen = 1 ] && [ $rc -ne 127 ]; then
+		# Go to last line on screen.  (There is supposedly "capping"
+		# behavior, so as long as you don't have a 10k line terminal,
+		# this will go to the last line.)
+		tput cup 9999 0
+		# Clear to end of line, to remove stuff yazi may have left
+		# there.
+		tput el
+	fi
+	return $rc
+}
+
 
 ######################################################################
 ### Python
