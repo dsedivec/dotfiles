@@ -1,5 +1,24 @@
 # -*- mode: sh; -*-
 
+# If you run `direnv stdlib`, you can see that it includes _some_ of
+# the functions from
+# https://github.com/bashup/realpaths/blob/master/realpaths, which is
+# a pure Bash portable implementation of some/all of GNU realpath.
+# However, they didn't include realpath.relative, which is what I
+# wanted, so I'm including it here.  It depends on direnv continuing
+# to include realpath.absolute and realpath.dirname.  Formatting left
+# as in the original, except indentation converted from tabs to
+# spaces.
+realpath.relative() {
+    local target=""
+    realpath.absolute "$1"; set -- "$REPLY" "${@:2}"; realpath.absolute "${2-$PWD}" X
+    while realpath.dirname "$REPLY"; [[ "$1" != "$REPLY" && "$1" == "${1#"${REPLY%/}"/}" ]]; do
+        target=../$target
+    done
+    [[ $1 == "$REPLY" ]] && REPLY=${target%/} || REPLY="$target${1#"${REPLY%/}"/}"
+    REPLY=${REPLY:-.}
+}
+
 layout_poetry() {
     PYPROJECT_TOML="${PYPROJECT_TOML:-pyproject.toml}"
     if [[ ! -f "$PYPROJECT_TOML" ]]; then

@@ -10,6 +10,10 @@ die() {
 my_name=$(basename "$0")
 [[ $# -eq 0 ]] || die "error: $my_name takes no arguments"
 
+# if command -v delta >/dev/null 2>&1; then
+# 	exec delta || die "$my_name failed to exec delta"
+# fi
+
 if command -v diff-so-fancy >/dev/null 2>&1; then
 	exec diff-so-fancy || die "$my_name failed to exec diff-so-fancy"
 fi
