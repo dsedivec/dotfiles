@@ -19,6 +19,30 @@ realpath.relative() {
     REPLY=${REPLY:-.}
 }
 
+make_venv_symlink() {
+    local REPLY=''
+    if [[ -z "$VIRTUAL_ENV" ]]; then
+        echo "error making .venv: VIRTUAL_ENV not set" >&2
+        return 1
+    fi
+    realpath.relative "$VIRTUAL_ENV"
+    if [[ $? -ne 0 || -z "$REPLY" ]]; then
+        echo "error making .venv: realpath.relative failed on \"$VIRTUAL_ENV\"" >&2
+        return 1
+    fi
+    if [[ -h .venv ]]; then
+        if [[ "$(readlink .venv)" == "$REPLY" ]]; then
+            # Nothing to do, link is correct.
+            return 0
+        fi
+        rm .venv
+    elif [[ -e .venv ]]; then
+        echo "error making .venv: .venv exists and is not a symlink" >&2
+        return 1
+    fi
+    ln -s "$REPLY" .venv
+}
+
 layout_poetry() {
     PYPROJECT_TOML="${PYPROJECT_TOML:-pyproject.toml}"
     if [[ ! -f "$PYPROJECT_TOML" ]]; then
