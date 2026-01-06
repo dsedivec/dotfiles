@@ -40,6 +40,11 @@
 		| fzf -m --preview='git log -10 --no-merges {}' \
 		| git branch -D
 
+	# dft → difftastic
+	dftlog = -c diff.external=difft log --ext-diff
+	dftshow = -c diff.external=difft show --ext-diff
+	dftdiff = -c diff.external=difft diff
+
 	# Verbs:
 	# p = pull
 	# m = merge
