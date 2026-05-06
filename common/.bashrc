@@ -802,6 +802,7 @@ if (( ${#fzf_scripts[@]} )); then
 	complete -I -F _fzf_complete_initial_word -o default -o bashdefault
 fi
 
+
 ######################################################################
 ### Other cute commands
 
