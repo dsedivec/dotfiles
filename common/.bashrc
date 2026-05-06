@@ -840,6 +840,8 @@ vimkill () {
 	return $status
 }
 
+alias dclaude='claude --allow-dangerously-skip-permissions'
+
 
 ######################################################################
 ### Fancy prompt
