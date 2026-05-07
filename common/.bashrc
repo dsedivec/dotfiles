@@ -550,6 +550,23 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 
 ######################################################################
+### Java
+
+if [ "$(uname -s)" = "Darwin" ]; then
+	with_java() {
+		local JAVA_HOME
+		JAVA_HOME=$(/usr/libexec/java_home -Fv "$1")
+		if [ $? -ne 0 ]; then
+			echo "Cannot find Java v$1" >&2
+			return 1
+		fi
+		shift 1
+		JAVA_HOME=$JAVA_HOME "$@"
+	}
+fi
+
+
+######################################################################
 ### Colima
 
 if is_available colima; then
