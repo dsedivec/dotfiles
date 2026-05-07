@@ -502,6 +502,11 @@ workon() {
 	. "$activate"
 }
 
+# It would be nice if coding agents would stop fucking up my system
+# Python install.
+PIP_REQUIRE_VIRTUALENV=true
+export PIP_REQUIRE_VIRTUALENV
+
 # https://github.com/pypa/pipx/issues/1212
 export PIPX_HOME=$HOME/.local/share/pipx
 
