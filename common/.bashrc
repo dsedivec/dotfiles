@@ -805,7 +805,7 @@ if (( ${#fzf_scripts[@]} )); then
 		local FZF_ALT_C_COMMAND=$FZF_ALT_SHIFT_C_COMMAND
 		__fzf_cd__
 	}
-	bind -m emacs-standard '"\eC": " \C-b\C-k \C-u`__fzf_cd_deep__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d\C-y\ey\C-_"'
+	bind -m emacs-standard '"\eC": " \C-b\C-k \C-u`__fzf_cd_deep__`\e\C-e\C-\e(\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d\C-y\ey\C-_"'
 
 	# Complete all commands with "**"?  I don't know why this isn't
 	# the default for Bash.  Thinking complete -D might be too new?
