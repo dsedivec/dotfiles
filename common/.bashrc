@@ -700,6 +700,9 @@ if [ -n "${PS1:-}" ]; then
 	elif [ -r /opt/homebrew/opt/fzf/shell ]; then
 		# ARM Homebrew
 		fzf_scripts=(/opt/homebrew/opt/fzf/shell/{completion,key-bindings}.bash)
+	elif [ -r /usr/share/bash/plugins/fzf ]; then
+		# Alpine Linux
+		fzf_scripts=(/usr/share/bash/plugins/fzf/{completion,key-bindings}.bash)
 	else
 		fzf_scripts=()
 	fi
