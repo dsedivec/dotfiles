@@ -1,0 +1,11 @@
+h1 {
+    text-align: left;
+}
+
+#typora-source .CodeMirror-lines {
+    max-width: unset;
+}
+
+#typora-source .CodeMirror-linenumber {
+    visibility: visible;
+}
