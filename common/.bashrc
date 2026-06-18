@@ -459,6 +459,49 @@ yazi() {
 	return $rc
 }
 
+if [ "$(uname -s)" == Darwin ]; then
+	# Annoyingly, you can't "open -a" a file that doesn't exist.
+	# Kludge: If file doesn't exist, create it, run Typora on it,
+	# delete it immediately.  I feel certain there must be a race
+	# here.
+	typora() {
+		local -a files_to_create=()
+		local -a files_created=()
+		local file
+		local file_creation_error=0
+		for file in "$@"; do
+			if [ -z "${file##-*}" ]; then
+				echo "Invalid argument: '$file'" >&2
+				return 1
+			fi
+			if [ ! -e "$file" ]; then
+				files_to_create+=("$file")
+			fi
+		done
+		for file in "${files_to_create[@]}"; do
+			if ! touch "$file"; then
+				echo "Error creating '$file'" >&2
+				file_creation_error=1
+				break
+			fi
+			files_created+=("$file")
+		done
+		if [ $file_creation_error = 0 ]; then
+			open -a Typora "$@"
+		fi
+		for file in "${files_created[@]}"; do
+			if [ -f "$file" ]; then
+				if [ -s "$file" ]; then
+					echo "Warning: '$file' non-empty, not deleting" >&2
+				else
+					rm "$file"
+				fi
+			fi
+		done
+		[ $file_creation_error -eq 0 ]
+	}
+fi
+
 
 ######################################################################
 ### Python
