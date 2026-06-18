@@ -135,7 +135,7 @@ new_PATH=:
 saved_IFS=$IFS
 IFS=:
 for dir in $PATH; do
-	if [ -n "${new_PATH##*:$dir:*}" ] && [ -d "$dir" ]; then
+	if [ -n "${new_PATH##*:"$dir":*}" ] && [ -d "$dir" ]; then
 		new_PATH=$new_PATH$dir:
 	fi
 done
