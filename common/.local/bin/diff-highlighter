@@ -28,6 +28,7 @@ if command -v diff-highlight >/dev/null 2>&1; then
 fi
 
 for contrib_dir in \
+	/opt/homebrew/share/git-core/contrib/diff-highlight \
 	/opt/local/share/git/contrib/diff-highlight \
 	/usr/local/share/git-core/contrib/diff-highlight
 do
