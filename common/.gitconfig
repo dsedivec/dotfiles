@@ -120,6 +120,7 @@
 	patternType = perl
 [diff-so-fancy]
 	markEmptyLines = false
+	changeHunkIndicators = false
 [magit]
 	hideCampaign = true
 [log]
