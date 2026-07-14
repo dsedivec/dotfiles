@@ -318,14 +318,19 @@ then
 	# -R makes colors work in ag when it uses less as a pager in OS
 	# X/iTerm 2.  -F makes less exit when all the output fits on a
 	# single screen, which is nice when doing something like "git log
-	# --oneline -1".  Just make sure to turn off alternate screen
-	# clearing (e.g. "Disable save/restore alternate screen" in
-	# iTerm2) otherwise you'll do "git log --oneline -1" and then
-	# you'll see no output until you think to try something like
-	# "git log --oneline -1 | cat".
-	if [ "${LESS:=-RF}" != "-RF" ]; then
-		LESS="${LESS%% -RF} -RF"
-	fi
+	# --oneline -1".  -i makes searches case-insensitive by default.
+	# Just make sure to turn off alternate screen clearing
+	# (e.g. "Disable save/restore alternate screen" in iTerm2)
+	# otherwise you'll do "git log --oneline -1" and then you'll see
+	# no output until you think to try something like "git log
+	# --oneline -1 | cat".
+	for _less_opt in R F i; do
+		case "$LESS" in
+			*"$_less_opt"*) ;;  # Already present.
+			*) LESS="${LESS:+$LESS }-$_less_opt" ;;
+		esac
+	done
+	unset _less_opt
 	export LESS
 
 	if is_available bat; then
