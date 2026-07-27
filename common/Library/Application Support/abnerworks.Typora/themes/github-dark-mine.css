@@ -280,6 +280,7 @@ code {
     margin-top: 15px;
     padding-top: 8px;
     padding-bottom: 6px;
+    caret-color: AccentColor;
 }
 
 
@@ -457,7 +458,7 @@ header, .context-menu, .megamenu-content, footer{
 }
 
 .cm-s-inner .CodeMirror-cursor {
-  border-left: 1px solid #FFCC00;
+  border-left: 1px solid AccentColor !important;
 }
 
 .cm-s-inner div.CodeMirror-selected {
