@@ -656,7 +656,7 @@ fi
 # as the function RVM (above) installs.  That's why this is so far
 # down in the file.
 if [ "$(type -t cd)" = "function" ]; then
-	real_cd=_cd_before_printing_pwd
+	real_cd=__cd_before_printing_pwd
 	# Recipe for copying a function (in lieu of renaming) from
 	# http://stackoverflow.com/questions/1203583/how-do-i-rename-a-bash-function
 	eval "$(echo 'function' $real_cd; declare -f cd | tail -n +2)"
