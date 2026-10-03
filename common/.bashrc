@@ -603,6 +603,10 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 if [ "$(uname -s)" = "Darwin" ]; then
 	with_java() {
 		local JAVA_HOME
+		if [ $# -ne 1 ]; then
+			echo "Usage: $FUNCNAME <version>" >&2
+			return 1
+		fi
 		JAVA_HOME=$(/usr/libexec/java_home -Fv "$1")
 		if [ $? -ne 0 ]; then
 			echo "Cannot find Java v$1" >&2
