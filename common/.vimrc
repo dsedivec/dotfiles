@@ -10,7 +10,15 @@ call plug#begin('~/.vim/plugged')
 " Plug-ins
 Plug 'tpope/vim-sensible'
 Plug 'tomtom/tcomment_vim'
+
 Plug 'easymotion/vim-easymotion'
+" This acts exactly like avy-goto-char-timer
+map s <Plug>(easymotion-sn)
+let g:EasyMotion_startofline = 0
+let g:EasyMotion_inc_search_timeout = 300
+let g:EasyMotion_keys = 'asdghklqwertyuiopzxcvbnm'
+let g:EasyMotion_smartcase = 1
+
 " Lets you kill a buffer without killing its window.
 " Try :BW (instead of :bw)
 " Possible alternative: https://github.com/moll/vim-bbye
