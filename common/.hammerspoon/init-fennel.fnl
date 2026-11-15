@@ -56,6 +56,14 @@
 
 (table.insert auto-dark-mode.hooks my-dark-mode-hook)
 
+;; Reload/quit must retire this module's timers, watchers and pending fetch.
+;; Keep any shutdown work installed by the rest of the configuration.
+(let [previous-shutdown hs.shutdownCallback]
+  (set hs.shutdownCallback
+       (fn []
+         (pcall auto-dark-mode.stop)
+         (when previous-shutdown (previous-shutdown)))))
+
 (auto-dark-mode.start true)
 
 ;; Call my hook to sync up with current system state.
