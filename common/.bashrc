@@ -842,14 +842,20 @@ if (( ${#fzf_scripts[@]} )); then
 
 	if is_available fd; then
 		# fd might be faster than find.
-		FZF_DEFAULT_COMMAND='fd --hidden --color=always'
 		FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --ansi"
-		FZF_ALT_SHIFT_C_COMMAND='fd --hidden --type dir'
-		FZF_ALT_C_COMMAND="$FZF_ALT_SHIFT_C_COMMAND --max-depth 1"
+		FZF_DEFAULT_COMMAND='fd --hidden --color=always'
 		FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+		FZF_ALT_SHIFT_C_COMMAND='fd --hidden --type dir'
+		# --follow makes symlinks to directories show up as dirs.
+		# --no-ignore makes it ignore gitignore, which is reasonable
+		# behavior within the CWD, where the list of candidate
+		# directories should be smaller (and when you might *know* a
+		# directory exists, so you want to be given the option to
+		# switch to it).
+		FZF_ALT_C_COMMAND="$FZF_ALT_SHIFT_C_COMMAND --follow --max-depth 1 --no-ignore"
 	else
-		FZF_ALT_C_COMMAND='find . -type d -print'
-		FZF_ALT_SHIFT_C_COMMAND='find . -maxdepth 1 -type d -print'
+		FZF_ALT_SHIFT_C_COMMAND='find . -type d -print'
+		FZF_ALT_C_COMMAND='find -L . -maxdepth 1 -type d -print'
 	fi
 
 	if is_available tree; then
